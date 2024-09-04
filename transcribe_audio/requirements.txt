@@ -1,0 +1,4 @@
+torch
+ffmpeg-python
+whisper
+tk
