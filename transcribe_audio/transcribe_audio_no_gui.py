@@ -9,7 +9,7 @@ def convert_to_wav(mp3_file):
     ffmpeg.input(mp3_file).output(wav_file, ar='16000').run(overwrite_output=True)
     return wav_file
 
-def transcribe_audio(wav_file, save_path, model_name="medium"):
+def transcribe_audio(wav_file, save_path, model_name="large"):
     """Transcribe the audio using Whisper and save it to the specified location."""
     model = whisper.load_model(model_name)
     result = model.transcribe(wav_file, language="es")
