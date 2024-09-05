@@ -21,20 +21,21 @@ def main(mp3_file):
     wav_file = convert_to_wav(mp3_file)
 
     # Define the output save path
-    save_path = "transcription.txt"
+    save_path = os.path.splitext(mp3_file)[0] + ".txt"
     
     # Transcribe the audio and save it
     transcribe_audio(wav_file, save_path)
     print(f"Transcription saved to {save_path}")
 
 if __name__ == "__main__":
+    print("Program to transcribe audio from an MP3 file.\n")
     if len(sys.argv) != 2:
         print("Usage: python script.py <path_to_mp3_file>")
         sys.exit(1)
     
     mp3_file = sys.argv[1]
     if not os.path.isfile(mp3_file):
-        print(f"File not found: {mp3_file}")
+        print(f"File not found: {mp3_file}.\nPlease provide a valid path to an MP3 file.")
         sys.exit(1)
     
     main(mp3_file)
