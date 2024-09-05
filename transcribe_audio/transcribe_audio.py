@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import filedialog, messagebox, simpledialog
+from tkinter import filedialog, messagebox
 import whisper
 import ffmpeg
 
@@ -49,7 +49,7 @@ def choose_model():
     
     tk.Button(model_window, text="OK", command=confirm_selection).pack(pady=10)
 
-    #Run the Tkinter main loop to display the window
+    # Run the Tkinter main loop to display the window
     model_window.mainloop()
 
     # Get the selected model value after closing
@@ -57,17 +57,60 @@ def choose_model():
     model_window.destroy()
     return selected_model
 
-def transcribe_audio(wav_file, save_path, model_name):
-    """Transcribe the audio using Whisper and save it to the specified location."""
-    model = whisper.load_model(model_name)
-    result = model.transcribe(wav_file, language="es")
-    with open(save_path, "w") as file:
-        file.write(result['text'])
+def choose_language():
+    """Prompt the user to choose the transcription language (English or Spanish)."""
+    languages = {"English": "en", "Spanish": "es"}
 
+    # Create a new Tkinter window for the dropdown menu
+    lang_window = tk.Tk()
+    lang_window.title("Choose Language")
+
+    # Create a variable for the dropdown menu
+    lang_var = tk.StringVar(value="es")
+
+    # Create and place the dropdown menu
+    tk.Label(lang_window, text="Select a transcription language").pack(pady=10)
+    lang_menu = tk.OptionMenu(lang_window, lang_var, *languages.keys())
+    lang_menu.pack(pady=10)
+
+    # Create a button to confirm the selection
+    def confirm_selection():
+        lang_window.quit()
+
+    tk.Button(lang_window, text="OK", command=confirm_selection).pack(pady=10)
+
+    # Run the Tkinter main loop to display the window
+    lang_window.mainloop()
+
+    # Get the selected languag code after closing
+    selected_language = languages[lang_var.get()]
+    lang_window.destroy()
+    return selected_language
+
+def format_timestamp(seconds):
+    """Convert seconds to HH:MM:SS format."""
+    hours = int(seconds // 3600)
+    minutes = int(seconds // 60)
+    seconds = int(seconds % 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+def transcribe_audio(wav_file, save_path, model_name, language):
+    """Transcribe the audio using Whisper and save it with formatted timestamps."""
+    model = whisper.load_model(model_name)
+    result = model.transcribe(wav_file, language=language, verbose=False)
+    
+    # Save the transcription with timestamps
+    with open(save_path, "w") as file:
+        for segment in result['segments']:
+            start = format_timestamp(segment['start'])
+            end = format_timestamp(segment['end'])
+            text = segment['text'].strip()
+            file.write(f"[{start} - {end}] {text}\n")
+    
 def main():
-    # create a simple GUI for selecting files
+    # Create a simple GUI for selecting files
     root = tk.Tk()
-    root.withdraw() # hide the main window
+    root.withdraw() # Hide the main window
 
     # Select the MP3 file
     mp3_file = select_file()
@@ -83,6 +126,12 @@ def main():
     if not model_name:
         messagebox.showinfo("No model selected", "No Whisper model was selected.")
         return
+    
+    # Choose transcription language
+    language = choose_language()
+    if not language:
+        messagebox.showinfo("No language selected", "No language was selected.")
+        return
 
     # Select save location
     save_path = save_file()
@@ -91,13 +140,13 @@ def main():
         return
     
     # Transcribe the audio and save it
-    transcribe_audio(wav_file, save_path, model_name)
+    transcribe_audio(wav_file, save_path, model_name, language)
     messagebox.showinfo("Success", f"Transcription saved to {save_path}")
     
     # Remove the temporary WAV file
     if os.path.exists(wav_file):
         os.remove(wav_file)
-        print(f"Temprary WAV file {wav_file} removed.")
+        print(f"Temporary WAV file {wav_file} removed.")
     
     print(f"Transcription completed and saved to {save_path}")
 
