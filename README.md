@@ -4,11 +4,10 @@ This repository contains a set of utilities developed for the EDIA project by Fu
 
 ## Repository Contents
 
-The repository includes the following scripts:
+The repository includes the following tools:
 
 1. **youtube_downloader**: A Bash script that downloads audio and video from a YouTube link.
 2. **transcribe_audio**: A Python program that transcribes audio from an MP3 file and saves the transcription to a text file.
-3. **text_file_formatter**: A Python script that formats a text file by adding line breaks after every 13 words.
 
 Each program has its own `README.md` file within its respective directory, detailing installation and usage instructions.
 
