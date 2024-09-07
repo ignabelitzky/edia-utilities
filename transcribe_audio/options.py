@@ -1,5 +1,6 @@
 import tkinter as tk
 
+
 def choose_model():
     """Prompt the user to choose a Whisper model using a dropdown menu."""
     models = ["tiny", "base", "small", "medium", "large"]
@@ -16,6 +17,7 @@ def choose_model():
     selected_model = model_var.get()
     model_window.destroy()
     return selected_model
+
 
 def choose_language():
     """Prompt the user to choose the transcription language (English or Spanish)."""
