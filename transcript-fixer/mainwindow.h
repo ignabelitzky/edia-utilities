@@ -40,6 +40,8 @@ private slots:
     void on_actionOpen_audio_video_file_triggered();
     void on_actionLoad_transcription_file_triggered();
 
+    void on_actionSave_transcription_triggered();
+
 private:
     Ui::MainWindow *ui;
     bool isPlaying;
@@ -50,5 +52,6 @@ private:
     void connect_signals();
     void set_default_icons();
     void load_transcription_file(const QString &filePath);
+    void save_transcription_file(const QString &filePath);
 };
 #endif // MAINWINDOW_H

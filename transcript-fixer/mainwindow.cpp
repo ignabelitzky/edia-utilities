@@ -212,6 +212,19 @@ void MainWindow::on_actionLoad_transcription_file_triggered()
     }
 }
 
+void MainWindow::on_actionSave_transcription_triggered()
+{
+    QString filePath = QFileDialog::getSaveFileName(this,
+                                                    "Save Transcription File",
+                                                    QDir::homePath(),
+                                                    "Text Files (*.txt);;All Files (*.*");
+    // Check if a file was selected
+    if (!filePath.isEmpty())
+    {
+        save_transcription_file(filePath);
+    }
+}
+
 void MainWindow::connect_signals()
 {
     connect(ui->speedComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::on_playbackSpeedChanged);
@@ -254,6 +267,27 @@ void MainWindow::load_transcription_file(const QString &filePath)
             item->setFlags(item->flags() | Qt::ItemIsEditable);
             ui->transcriptionListWidget->addItem(item);
         }
+    }
+
+    file.close();
+}
+
+
+void MainWindow::save_transcription_file(const QString &filePath)
+{
+    QFile file(filePath);
+
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        QMessageBox::warning(this, "Error", "Failed to save the file.");
+        return;
+    }
+
+    QTextStream out(&file);
+    for (int i = 0; i < ui->transcriptionListWidget->count(); ++i)
+    {
+        QListWidgetItem *item = ui->transcriptionListWidget->item(i);
+        out << item->text() << "\n";
     }
 
     file.close();

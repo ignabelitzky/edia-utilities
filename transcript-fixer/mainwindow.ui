@@ -308,7 +308,10 @@
   </action>
   <action name="actionSave_transcription">
    <property name="text">
-    <string>Save transcription</string>
+    <string>&amp;Save transcription</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionExit">
