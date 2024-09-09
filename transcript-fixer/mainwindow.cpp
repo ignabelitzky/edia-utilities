@@ -1,12 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "utils.h"
+#include "params.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-    , isPlaying(false)
-    , isMuted(false)
+    : QMainWindow(parent), ui(new Ui::MainWindow), isPlaying(false)
+    , isMuted(false), seekAmount(appconfig::SEEK_AMOUNT)
 {
     ui->setupUi(this);
     mediaPlayer = new QMediaPlayer(this);
@@ -27,6 +26,9 @@ MainWindow::MainWindow(QWidget *parent)
     // Set default speed (1.0x)
     ui->speedComboBox->setCurrentIndex(1);
 
+    // Initialize media label
+    update_mediaLabel("");
+
     // Connect speedComboBox to slot
     connect(ui->speedComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::on_playbackSpeedChanged);
 
@@ -38,13 +40,13 @@ MainWindow::MainWindow(QWidget *parent)
     // Update the slider position as the media plays
     connect(mediaPlayer, &QMediaPlayer::positionChanged, this, [this](qint64 position) {
         ui->audioSlider->setValue(static_cast<int>(position));
-        ui->currentTimeLabel->setText(Utils::formatTime(position));
+        ui->currentTimeLabel->setText(utils::format_time(position));
     });
 
     // Update the slider range when the media duration is known
     connect(mediaPlayer, &QMediaPlayer::durationChanged, this, [this](qint64 duration) {
         ui->audioSlider->setRange(0, static_cast<int>(duration));
-        ui->totalDurationLabel->setText(Utils::formatTime(duration));
+        ui->totalDurationLabel->setText(utils::format_time(duration));
     });
 
     // Allow the user to seek to a position in the media by moving the slider
@@ -58,6 +60,10 @@ MainWindow::MainWindow(QWidget *parent)
             mediaPlayer->setPosition(0);
         }
     });
+
+    // Connect playback control buttons
+    connect(ui->backwardButton, &QPushButton::clicked, this, &MainWindow::on_backwardButton_clicked);
+    connect(ui->forwardButton, &QPushButton::clicked, this, &MainWindow::on_forwardButton_clicked);
 
     ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     ui->volumeButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
@@ -78,7 +84,9 @@ void MainWindow::on_volumeButton_clicked()
     if(isMuted)
     {
         ui->volumeButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolumeMuted));
-    } else {
+    }
+    else
+    {
         ui->volumeButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
     }
     audioOutput->setMuted(isMuted);
@@ -91,16 +99,56 @@ void MainWindow::on_playButton_clicked()
     {
         ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
         mediaPlayer->play();
-    } else {
+    }
+    else
+    {
         ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
         mediaPlayer->pause();
     }
 }
 
+// Handle playback speed change
 void MainWindow::on_playbackSpeedChanged(int index)
 {
+    Q_UNUSED(index);
     double speed = ui->speedComboBox->currentData().toDouble();
     mediaPlayer->setPlaybackRate(speed);
+}
+
+void MainWindow::on_backwardButton_clicked()
+{
+    qint64 currentPosition = mediaPlayer->position();
+    qint64 newPosition = currentPosition - seekAmount;
+    if (newPosition < 0)
+    {
+        newPosition = 0;
+    }
+    mediaPlayer->setPosition(newPosition);
+}
+
+void MainWindow::on_forwardButton_clicked()
+{
+    qint64 currentPosition = mediaPlayer->position();
+    qint64 newPosition = currentPosition + seekAmount;
+    if (newPosition > mediaPlayer->duration())
+    {
+        newPosition = mediaPlayer->duration();
+    }
+    mediaPlayer->setPosition(newPosition);
+}
+
+void MainWindow::update_mediaLabel(const QString &fileName)
+{
+    if (fileName.isEmpty())
+    {
+        ui->mediaFilenameLabel->setText("Media file not opened.");
+        ui->mediaFilenameLabel->setStyleSheet("color: red;");
+    }
+    else
+    {
+        ui->mediaFilenameLabel->setText(fileName);
+        ui->mediaFilenameLabel->setStyleSheet("");
+    }
 }
 
 void MainWindow::on_actionOpen_audio_video_file_triggered()
@@ -117,7 +165,11 @@ void MainWindow::on_actionOpen_audio_video_file_triggered()
 
         // Extract the base name of the file
         QFileInfo fileInfo(filePath);
-        ui->audioVideoFilenameLabel->setText(fileInfo.fileName());
+        update_mediaLabel(fileInfo.fileName());
+    }
+    else
+    {
+        update_mediaLabel("");
     }
 }
 

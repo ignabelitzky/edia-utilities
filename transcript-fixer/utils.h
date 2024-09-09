@@ -4,8 +4,8 @@
 #include <QString>
 #include <QTime>
 
-namespace Utils {
-    QString formatTime(qint64 ms);
+namespace utils {
+    QString format_time(const qint64 ms);
 }
 
 #endif // UTILS_H

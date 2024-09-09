@@ -1,6 +1,6 @@
 #include "utils.h"
 
-QString Utils::formatTime(qint64 ms)
+QString utils::format_time(const qint64 ms)
 {
     int hours = (ms / (1000 * 60 * 60)) % 24;
     int minutes = (ms / (1000 * 60)) % 60;

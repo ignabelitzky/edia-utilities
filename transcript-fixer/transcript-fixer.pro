@@ -15,6 +15,7 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
+    params.h \
     utils.h
 
 FORMS += \

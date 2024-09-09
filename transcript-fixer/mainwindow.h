@@ -25,12 +25,16 @@ private slots:
     void on_volumeButton_clicked();
     void on_playButton_clicked();
     void on_playbackSpeedChanged(int index);
+    void on_backwardButton_clicked();
+    void on_forwardButton_clicked();
+    void update_mediaLabel(const QString &fileName);
     void on_actionOpen_audio_video_file_triggered();
 
 private:
     Ui::MainWindow *ui;
     bool isPlaying;
     bool isMuted;
+    qint64 seekAmount;
     QMediaPlayer *mediaPlayer;
     QAudioOutput *audioOutput;
 };

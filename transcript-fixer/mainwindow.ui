@@ -32,29 +32,16 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <spacer name="horizontalSpacer_5">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="audioVideoLabel">
+         <widget class="QLabel" name="mediaLabel">
           <property name="text">
-           <string>Audio/Video File Name:</string>
+           <string>Media filename:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="audioVideoFilenameLabel">
+         <widget class="QLabel" name="mediaFilenameLabel">
           <property name="text">
-           <string>AUDIO/VIDEO_FILENAME</string>
+           <string>MEDIA_FILENAME</string>
           </property>
          </widget>
         </item>
@@ -76,22 +63,9 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <spacer name="horizontalSpacer_6">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
          <widget class="QLabel" name="transcriptionLabel">
           <property name="text">
-           <string>Transcription File Name:</string>
+           <string>Transcription filename:</string>
           </property>
          </widget>
         </item>
@@ -252,8 +226,8 @@
         </property>
         <property name="iconSize">
          <size>
-          <width>25</width>
-          <height>25</height>
+          <width>20</width>
+          <height>20</height>
          </size>
         </property>
        </widget>
@@ -325,7 +299,10 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen_audio_video_file">
    <property name="text">
-    <string>Open audio/video file</string>
+    <string>&amp;Open audio/video file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionLoad_transcription_file">
