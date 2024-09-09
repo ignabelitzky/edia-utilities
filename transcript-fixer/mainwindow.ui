@@ -140,7 +140,7 @@
       <item>
        <widget class="QLabel" name="currentTimeLabel">
         <property name="text">
-         <string>TIME_DURATION</string>
+         <string>00:00:00</string>
         </property>
        </widget>
       </item>
@@ -152,11 +152,14 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="totalTimeLabel">
+       <widget class="QLabel" name="totalDurationLabel">
         <property name="text">
-         <string>TIME_DURATION</string>
+         <string>00:00:00</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="speedComboBox"/>
       </item>
      </layout>
     </item>

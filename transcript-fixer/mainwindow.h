@@ -5,6 +5,7 @@
 #include <QtMultimedia>
 #include <QStyle>
 #include <QFileDialog>
+#include <QAbstractItemView>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -23,6 +24,7 @@ public:
 private slots:
     void on_volumeButton_clicked();
     void on_playButton_clicked();
+    void on_playbackSpeedChanged(int index);
     void on_actionOpen_audio_video_file_triggered();
 
 private:
