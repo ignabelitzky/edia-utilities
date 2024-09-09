@@ -94,17 +94,7 @@
      </layout>
     </item>
     <item>
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Orientation::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
+     <widget class="QListWidget" name="transcriptionListWidget"/>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -173,6 +163,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="playButton">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -307,7 +300,10 @@
   </action>
   <action name="actionLoad_transcription_file">
    <property name="text">
-    <string>Load transcription file</string>
+    <string>&amp;Load transcription file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
    </property>
   </action>
   <action name="actionSave_transcription">
