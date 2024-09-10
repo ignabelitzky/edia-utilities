@@ -103,6 +103,9 @@
             <height>16</height>
            </size>
           </property>
+          <property name="shortcut">
+           <string>Ctrl++</string>
+          </property>
          </widget>
         </item>
         <item>
@@ -118,6 +121,9 @@
             <width>32</width>
             <height>16</height>
            </size>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+-</string>
           </property>
          </widget>
         </item>

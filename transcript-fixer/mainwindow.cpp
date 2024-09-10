@@ -275,6 +275,8 @@ void MainWindow::on_actionShortcuts_triggered()
     shortcutsText += "<b>Forward:</b> Right Arrow<br>";
     shortcutsText += "<b>Mute:</b> Ctrl+M<br>";
     shortcutsText += "<b>Jump to Time:</b> Double-click on transcription<br>";
+    shortcutsText += "<b>Add row:</b> Ctrl++<br>";
+    shortcutsText += "<b>Delete row:</b> Ctrl+-<br>";
     shortcutsText += "<b>Quit:</b> Ctrl+E";
 
     QMessageBox::information(this, "Shortcuts", shortcutsText);
