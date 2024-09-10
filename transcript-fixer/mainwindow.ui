@@ -41,7 +41,7 @@
         <item>
          <widget class="QLabel" name="mediaFilenameLabel">
           <property name="text">
-           <string>MEDIA_FILENAME</string>
+           <string>media_filename</string>
           </property>
          </widget>
         </item>
@@ -72,7 +72,7 @@
         <item>
          <widget class="QLabel" name="transcriptionFilenameLabel">
           <property name="text">
-           <string>TRANSCRIPTION_FILENAME</string>
+           <string>transcription_filename</string>
           </property>
          </widget>
         </item>
@@ -89,12 +89,60 @@
           </property>
          </spacer>
         </item>
+        <item>
+         <widget class="QPushButton" name="addButton">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset theme="QIcon::ThemeIcon::ListAdd"/>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>32</width>
+            <height>16</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="deleteButton">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset theme="QIcon::ThemeIcon::ListRemove"/>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>32</width>
+            <height>16</height>
+           </size>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
     </item>
     <item>
-     <widget class="QListWidget" name="transcriptionListWidget"/>
+     <widget class="QTableWidget" name="tableWidget">
+      <column>
+       <property name="text">
+        <string>Start</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>End</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Text</string>
+       </property>
+      </column>
+     </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_4">

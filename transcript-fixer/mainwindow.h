@@ -7,7 +7,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QAbstractItemView>
-#include <QListWidgetItem>
+#include <QTableWidgetItem>
+#include "utils.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -31,15 +32,15 @@ private slots:
     void update_position(qint64 position);
     void update_duration(qint64 duration);
     void handle_media_status_changed(QMediaPlayer::MediaStatus status);
-    void jump_to_time(QListWidgetItem *item);
+    void jump_to_time(QTableWidgetItem *item);
     void on_backwardButton_clicked();
     void on_forwardButton_clicked();
     void update_media_label(const QString &fileName);
     void update_transcription_label(const QString &fileName);
-    void update_transcriptionListWidget(const QStringList &transcriptions);
+    void add_row();
+    void delete_row();
     void on_actionOpen_audio_video_file_triggered();
     void on_actionLoad_transcription_file_triggered();
-
     void on_actionSave_transcription_triggered();
 
 private:
@@ -49,8 +50,10 @@ private:
     qint64 seekAmount;
     QMediaPlayer *mediaPlayer;
     QAudioOutput *audioOutput;
+    std::vector<Element> transcriptionElements;
     void connect_signals();
     void set_default_icons();
+    void populate_table();
     void load_transcription_file(const QString &filePath);
     void save_transcription_file(const QString &filePath);
 };

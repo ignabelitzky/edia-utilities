@@ -8,9 +8,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Configure the transcription list widget
-    ui->transcriptionListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->transcriptionListWidget->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked);
+    // Set the window to maximized mode
+    this->showMaximized();
+
+    // Set the window title
+    this->setWindowTitle("TranscriptFixer");
 
     // Initialize media player and audio output
     mediaPlayer = new QMediaPlayer(this);
@@ -105,11 +107,12 @@ void MainWindow::handle_media_status_changed(QMediaPlayer::MediaStatus status)
     }
 }
 
-void MainWindow::jump_to_time(QListWidgetItem *item)
+void MainWindow::jump_to_time(QTableWidgetItem *item)
 {
-    QString text = item->text();
-    qint64 time = utils::extract_start_time(text);
-    mediaPlayer->setPosition(time);
+    int row = item->row();
+    QString startTimeString = ui->tableWidget->item(row, 0)->text();
+    qint64 timeInMs = utils::convert_time_to_ms(startTimeString);
+    mediaPlayer->setPosition(timeInMs);
 }
 
 void MainWindow::on_backwardButton_clicked()
@@ -162,12 +165,38 @@ void MainWindow::update_transcription_label(const QString &fileName)
     }
 }
 
-void MainWindow::update_transcriptionListWidget(const QStringList &transcriptions)
+void MainWindow::add_row()
 {
-    ui->transcriptionListWidget->clear();
-    for (const QString &line : transcriptions)
+    int currentRow = ui->tableWidget->currentRow();
+
+    if (currentRow == -1)
     {
-        ui->transcriptionListWidget->addItem(line);
+        currentRow = ui->tableWidget->rowCount();
+    }
+
+    ui->tableWidget->insertRow(currentRow);
+
+    QTableWidgetItem *startTimeItem = new QTableWidgetItem("00:00:00");
+    QTableWidgetItem *endTimeItem = new QTableWidgetItem("00:00:00");
+    QTableWidgetItem *textItem = new QTableWidgetItem("");
+
+    ui->tableWidget->setItem(currentRow, 0, startTimeItem);
+    ui->tableWidget->setItem(currentRow, 1, endTimeItem);
+    ui->tableWidget->setItem(currentRow, 2, textItem);
+}
+
+void MainWindow::delete_row()
+{
+    int currentRow = ui->tableWidget->currentRow();
+
+    if (currentRow == -1)
+    {
+        currentRow = ui->tableWidget->rowCount() - 1;
+    }
+
+    if (ui->tableWidget->rowCount() > 0 && currentRow >= 0 && currentRow < ui->tableWidget->rowCount())
+    {
+        ui->tableWidget->removeRow(currentRow);
     }
 }
 
@@ -235,7 +264,9 @@ void MainWindow::connect_signals()
     connect(mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, &MainWindow::handle_media_status_changed);
     connect(ui->backwardButton, &QPushButton::clicked, this, &MainWindow::on_backwardButton_clicked);
     connect(ui->forwardButton, &QPushButton::clicked, this, &MainWindow::on_forwardButton_clicked);
-    connect(ui->transcriptionListWidget, &QListWidget::itemDoubleClicked, this, &MainWindow::jump_to_time);
+    connect(ui->tableWidget, &QTableWidget::itemClicked, this, &MainWindow::jump_to_time);
+    connect(ui->addButton, &QPushButton::clicked, this, &MainWindow::add_row);
+    connect(ui->deleteButton, &QPushButton::clicked, this, &MainWindow::delete_row);
 }
 
 void MainWindow::set_default_icons()
@@ -244,6 +275,18 @@ void MainWindow::set_default_icons()
     ui->volumeButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
     ui->backwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekBackward));
     ui->forwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
+}
+
+void MainWindow::populate_table()
+{
+    ui->tableWidget->setRowCount(transcriptionElements.size());
+    for (unsigned long i = 0; i < transcriptionElements.size(); ++i)
+    {
+        const Element& elem = transcriptionElements[i];
+        ui->tableWidget->setItem(i, 0, new QTableWidgetItem(elem.startTime));
+        ui->tableWidget->setItem(i, 1, new QTableWidgetItem(elem.endTime));
+        ui->tableWidget->setItem(i, 2, new QTableWidgetItem(elem.text));
+    }
 }
 
 void MainWindow::load_transcription_file(const QString &filePath)
@@ -257,21 +300,19 @@ void MainWindow::load_transcription_file(const QString &filePath)
     }
 
     QTextStream in(&file);
-    ui->transcriptionListWidget->clear();   // Clear any previous transcription
+    transcriptionElements.clear();  // Clear any previous transcription
 
     while (!in.atEnd())
     {
         QString line = in.readLine();
         if (!line.isEmpty()) {
-            QListWidgetItem *item = new QListWidgetItem(line);
-            item->setFlags(item->flags() | Qt::ItemIsEditable);
-            ui->transcriptionListWidget->addItem(item);
+            transcriptionElements.push_back(utils::extract_transcription_data(line));
         }
     }
-
     file.close();
+    populate_table();
+    ui->tableWidget->resizeColumnsToContents();
 }
-
 
 void MainWindow::save_transcription_file(const QString &filePath)
 {
@@ -284,10 +325,25 @@ void MainWindow::save_transcription_file(const QString &filePath)
     }
 
     QTextStream out(&file);
-    for (int i = 0; i < ui->transcriptionListWidget->count(); ++i)
+
+    // Iterate through all rows
+    int rowCount = ui->tableWidget->rowCount();
+    for (int i = 0; i < rowCount; ++i)
     {
-        QListWidgetItem *item = ui->transcriptionListWidget->item(i);
-        out << item->text() << "\n";
+        // Get the values from each column in the row
+        QTableWidgetItem *startTimeItem = ui->tableWidget->item(i, 0);
+        QTableWidgetItem *endTimeItem = ui->tableWidget->item(i, 1);
+        QTableWidgetItem *textItem = ui->tableWidget->item(i, 2);
+
+        QString startTime = startTimeItem ? startTimeItem->text() : "";
+        QString endTime = endTimeItem ? endTimeItem->text() : "";
+        QString text = textItem ? textItem->text() : "";
+
+        // Format the line in the desired format
+        QString line = QString("[%1 - %2] %3").arg(startTime, endTime, text);
+
+        // Write the line to the file
+        out << line << "\n";
     }
 
     file.close();

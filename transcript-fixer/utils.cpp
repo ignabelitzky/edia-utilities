@@ -8,7 +8,17 @@ QString utils::format_time(const qint64 ms)
     return QTime(hours, minutes, seconds).toString("HH:mm:ss");
 }
 
-qint64 utils::extract_start_time(const QString text)
+qint64 utils::convert_time_to_ms(const QString &timeString)
+{
+    QTime time = QTime::fromString(timeString, "hh:mm:ss");
+    if (!time.isValid())
+    {
+        return 0;
+    }
+    return QTime(0, 0).msecsTo(time);
+}
+
+qint64 utils::extract_start_time(const QString &text)
 {
     static const QRegularExpression re("\\[(\\d{2}):(\\d{2}):(\\d{2}) - \\d{2}:\\d{2}:\\d{2}\\]");
     QRegularExpressionMatch match = re.match(text);
@@ -27,7 +37,7 @@ qint64 utils::extract_start_time(const QString text)
     return 0;
 }
 
-qint64 utils::extract_end_time(const QString text)
+qint64 utils::extract_end_time(const QString &text)
 {
     static const QRegularExpression re("\\[(\\d{2}):(\\d{2}):(\\d{2}) - \\d{2}:\\d{2}:\\d{2}\\]");
     QRegularExpressionMatch match = re.match(text);
@@ -44,4 +54,24 @@ qint64 utils::extract_end_time(const QString text)
         return time.msecsSinceStartOfDay();
     }
     return 0;
+}
+
+Element utils::extract_transcription_data(const QString &line)
+{
+    // Define the regex pattern
+    QRegularExpression re(R"(\[(\d{2}:\d{2}:\d{2})\s*-\s(\d{2}:\d{2}:\d{2})\]\s*(.*))");
+    QRegularExpressionMatch match = re.match(line);
+
+    // Initialize an empty Element struct
+    Element elem;
+
+    // Check if the line matches the pattern
+    if (match.hasMatch())
+    {
+        // Extract start time, end time, and text from the matched groups
+        elem.startTime = match.captured(1); // First captured group is start time
+        elem.endTime = match.captured(2);   // Second captured group is end time
+        elem.text = match.captured(3);      // Third captured group is the transcription text
+    }
+    return elem;
 }
