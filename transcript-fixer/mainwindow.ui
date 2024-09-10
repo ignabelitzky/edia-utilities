@@ -207,6 +207,9 @@
           <height>25</height>
          </size>
         </property>
+        <property name="shortcut">
+         <string>Left</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -226,6 +229,9 @@
           <height>25</height>
          </size>
         </property>
+        <property name="shortcut">
+         <string>Space</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -241,6 +247,9 @@
           <width>25</width>
           <height>25</height>
          </size>
+        </property>
+        <property name="shortcut">
+         <string>Right</string>
         </property>
        </widget>
       </item>
@@ -270,6 +279,9 @@
           <width>20</width>
           <height>20</height>
          </size>
+        </property>
+        <property name="shortcut">
+         <string>Ctrl+M</string>
         </property>
        </widget>
       </item>
@@ -328,7 +340,7 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionSortcuts"/>
+    <addaction name="actionShortcuts"/>
     <addaction name="actionUsage_instructions"/>
     <addaction name="separator"/>
     <addaction name="actionAbout_TranscriptFixer"/>
@@ -340,7 +352,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen_audio_video_file">
    <property name="text">
-    <string>&amp;Open audio/video file</string>
+    <string>&amp;Open media file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -364,25 +376,37 @@
   </action>
   <action name="actionExit">
    <property name="text">
-    <string>Exit</string>
+    <string>&amp;Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
    </property>
   </action>
   <action name="actionUndo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Undo</string>
    </property>
   </action>
   <action name="actionRedo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Redo</string>
    </property>
   </action>
   <action name="actionFind_Replace">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Find/Replace</string>
    </property>
   </action>
-  <action name="actionSortcuts">
+  <action name="actionShortcuts">
    <property name="text">
     <string>Shortcuts</string>
    </property>

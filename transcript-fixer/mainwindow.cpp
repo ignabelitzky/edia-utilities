@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->setWindowTitle("TranscriptFixer");
 
     // Initialize media player and audio output
+    disable_media_interface();
     mediaPlayer = new QMediaPlayer(this);
     audioOutput = new QAudioOutput(this);
     mediaPlayer->setAudioOutput(audioOutput);
@@ -49,6 +50,12 @@ MainWindow::~MainWindow()
     delete ui;
     delete mediaPlayer;
     delete audioOutput;
+
+    for (Element* elem : transcriptionElements)
+    {
+        delete elem;
+    }
+    transcriptionElements.clear();
 }
 
 void MainWindow::on_volumeButton_clicked()
@@ -215,6 +222,9 @@ void MainWindow::on_actionOpen_audio_video_file_triggered()
         // Extract the base name of the file
         QFileInfo fileInfo(filePath);
         update_media_label(fileInfo.fileName());
+
+        // Enable media interface
+        enable_media_interface();
     }
     else
     {
@@ -254,6 +264,27 @@ void MainWindow::on_actionSave_transcription_triggered()
     }
 }
 
+void MainWindow::on_actionShortcuts_triggered()
+{
+    QString shortcutsText;
+    shortcutsText += "<b>Keyboard Shortcuts</b><br><br>";
+    shortcutsText += "<b>Open media file:</b> Ctrl+O<br>";
+    shortcutsText += "<b>Load transcription file:</b> Ctrl+L<br>";
+    shortcutsText += "<b>Play/Pause:</b> Space<br>";
+    shortcutsText += "<b>Rewind:</b> Left Arrow<br>";
+    shortcutsText += "<b>Forward:</b> Right Arrow<br>";
+    shortcutsText += "<b>Mute:</b> Ctrl+M<br>";
+    shortcutsText += "<b>Jump to Time:</b> Double-click on transcription<br>";
+    shortcutsText += "<b>Quit:</b> Ctrl+E";
+
+    QMessageBox::information(this, "Shortcuts", shortcutsText);
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    QApplication::quit();
+}
+
 void MainWindow::connect_signals()
 {
     connect(ui->speedComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::on_playbackSpeedChanged);
@@ -275,17 +306,27 @@ void MainWindow::set_default_icons()
     ui->volumeButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
     ui->backwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekBackward));
     ui->forwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
+
+    ui->playButton->setToolTip("Play");
+    ui->backwardButton->setToolTip("Backward");
+    ui->forwardButton->setToolTip("Forward");
+    ui->volumeButton->setToolTip("Mute/Unmute");
+    ui->addButton->setToolTip("Add row");
+    ui->deleteButton->setToolTip("Remove row");
 }
 
 void MainWindow::populate_table()
 {
+    // Clear the transcription text if any
+    ui->tableWidget->clearContents();
+
     ui->tableWidget->setRowCount(transcriptionElements.size());
     for (unsigned long i = 0; i < transcriptionElements.size(); ++i)
     {
-        const Element& elem = transcriptionElements[i];
-        ui->tableWidget->setItem(i, 0, new QTableWidgetItem(elem.startTime));
-        ui->tableWidget->setItem(i, 1, new QTableWidgetItem(elem.endTime));
-        ui->tableWidget->setItem(i, 2, new QTableWidgetItem(elem.text));
+        const Element* elem = transcriptionElements[i];
+        ui->tableWidget->setItem(i, 0, new QTableWidgetItem(elem->startTime));
+        ui->tableWidget->setItem(i, 1, new QTableWidgetItem(elem->endTime));
+        ui->tableWidget->setItem(i, 2, new QTableWidgetItem(elem->text));
     }
 }
 
@@ -349,3 +390,31 @@ void MainWindow::save_transcription_file(const QString &filePath)
     file.close();
 }
 
+void MainWindow::enable_media_interface()
+{
+    ui->backwardButton->setEnabled(true);
+    ui->forwardButton->setEnabled(true);
+    ui->playButton->setEnabled(true);
+}
+
+void MainWindow::disable_media_interface()
+{
+    ui->backwardButton->setEnabled(false);
+    ui->forwardButton->setEnabled(false);
+    ui->playButton->setEnabled(false);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Exit Confirmation", "Are you sure you want to close the application?",
+                                  QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes)
+    {
+        event->accept();
+    }
+    else
+    {
+        event->ignore();
+    }
+}

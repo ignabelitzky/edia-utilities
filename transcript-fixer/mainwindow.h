@@ -42,6 +42,8 @@ private slots:
     void on_actionOpen_audio_video_file_triggered();
     void on_actionLoad_transcription_file_triggered();
     void on_actionSave_transcription_triggered();
+    void on_actionShortcuts_triggered();
+    void on_actionExit_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -50,11 +52,16 @@ private:
     qint64 seekAmount;
     QMediaPlayer *mediaPlayer;
     QAudioOutput *audioOutput;
-    std::vector<Element> transcriptionElements;
+    std::vector<Element*> transcriptionElements;
     void connect_signals();
     void set_default_icons();
     void populate_table();
     void load_transcription_file(const QString &filePath);
     void save_transcription_file(const QString &filePath);
+    void enable_media_interface();
+    void disable_media_interface();
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
 };
 #endif // MAINWINDOW_H

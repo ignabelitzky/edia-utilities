@@ -56,22 +56,22 @@ qint64 utils::extract_end_time(const QString &text)
     return 0;
 }
 
-Element utils::extract_transcription_data(const QString &line)
+Element* utils::extract_transcription_data(const QString &line)
 {
     // Define the regex pattern
     QRegularExpression re(R"(\[(\d{2}:\d{2}:\d{2})\s*-\s(\d{2}:\d{2}:\d{2})\]\s*(.*))");
     QRegularExpressionMatch match = re.match(line);
 
     // Initialize an empty Element struct
-    Element elem;
+    Element* elem = new Element;
 
     // Check if the line matches the pattern
     if (match.hasMatch())
     {
         // Extract start time, end time, and text from the matched groups
-        elem.startTime = match.captured(1); // First captured group is start time
-        elem.endTime = match.captured(2);   // Second captured group is end time
-        elem.text = match.captured(3);      // Third captured group is the transcription text
+        elem->startTime = match.captured(1); // First captured group is start time
+        elem->endTime = match.captured(2);   // Second captured group is end time
+        elem->text = match.captured(3);      // Third captured group is the transcription text
     }
     return elem;
 }
