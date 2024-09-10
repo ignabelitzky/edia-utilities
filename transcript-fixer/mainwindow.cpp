@@ -280,6 +280,35 @@ void MainWindow::on_actionShortcuts_triggered()
     QMessageBox::information(this, "Shortcuts", shortcutsText);
 }
 
+void MainWindow::on_actionUsage_instructions_triggered()
+{
+    QString usageText =
+        "TranscriptFixer Application - Usage Instructions:\n\n"
+        "1. Open a media file (audio/video) using the 'Open Media File' menu.\n"
+        "2. Load a transcription file by selecting 'Load Transcription File'.\n"
+        "3. Use the media player controls to play, pause, rewind, and fast-forward.\n"
+        "4. Edit the transcription text directly in the grid.\n"
+        "5. Use the 'Save' option to save your changes.\n"
+        "6. You can search, und, and redo changes using the provided buttons.\n\n"
+        "For more details, refer to the documentation or contact support.";
+
+    QMessageBox::information(this, tr("Usage Instructions"), usageText);
+}
+
+
+void MainWindow::on_actionAbout_TranscriptFixer_triggered()
+{
+    QString aboutText =
+        "TranscriptFixer Application\n\n"
+        "Version 1.0\n\n"
+        "Developed by Ignacio Belitzky\n"
+        "This application allows users to correct and edit transcription text with timestamps.\n"
+        "Features include media playback synchronization with transcriptions, text search, undo/redo functionality, and more.\n\n"
+        "For feedback or issues, please contact ignabelitzky@mi.unc.edu.ar.";
+
+    QMessageBox::information(this, tr("About TranscriptFixer"), aboutText);
+}
+
 void MainWindow::on_actionExit_triggered()
 {
     QApplication::quit();
@@ -319,6 +348,7 @@ void MainWindow::populate_table()
 {
     // Clear the transcription text if any
     ui->tableWidget->clearContents();
+    ui->tableWidget->setRowCount(0);
 
     ui->tableWidget->setRowCount(transcriptionElements.size());
     for (unsigned long i = 0; i < transcriptionElements.size(); ++i)
@@ -341,7 +371,13 @@ void MainWindow::load_transcription_file(const QString &filePath)
     }
 
     QTextStream in(&file);
-    transcriptionElements.clear();  // Clear any previous transcription
+
+    // Clear any previous transcription
+    for (Element* elem : transcriptionElements)
+    {
+        delete elem;
+    }
+    transcriptionElements.clear();
 
     while (!in.atEnd())
     {
@@ -351,6 +387,7 @@ void MainWindow::load_transcription_file(const QString &filePath)
         }
     }
     file.close();
+
     populate_table();
     ui->tableWidget->resizeColumnsToContents();
 }
@@ -418,3 +455,4 @@ void MainWindow::closeEvent(QCloseEvent *event)
         event->ignore();
     }
 }
+

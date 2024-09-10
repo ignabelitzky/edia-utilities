@@ -44,6 +44,8 @@ private slots:
     void on_actionSave_transcription_triggered();
     void on_actionShortcuts_triggered();
     void on_actionExit_triggered();
+    void on_actionUsage_instructions_triggered();
+    void on_actionAbout_TranscriptFixer_triggered();
 
 private:
     Ui::MainWindow *ui;
