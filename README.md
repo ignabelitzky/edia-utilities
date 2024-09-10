@@ -8,6 +8,7 @@ The repository includes the following tools:
 
 1. **youtube_downloader**: A Bash script that downloads audio and video from a YouTube link.
 2. **transcribe_audio**: A Python program that transcribes audio from an MP3 file and saves the transcription to a text file.
+3. **TranscriptFixer**: TranscriptFixer is a Qt & C++ application for correcting and editing transcription texts with synchronized media playback.
 
 Each program has its own `README.md` file within its respective directory, detailing installation and usage instructions.
 
