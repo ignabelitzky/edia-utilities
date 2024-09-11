@@ -4,7 +4,7 @@
 #include "params.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), isPlaying(false), isMuted(false), seekAmount(appconfig::SEEK_AMOUNT)
+    : QMainWindow(parent), ui(new Ui::MainWindow), isPlaying(false), isMuted(false)
 {
     ui->setupUi(this);
 
@@ -128,23 +128,15 @@ void MainWindow::jump_to_time(QTableWidgetItem *item)
 
 void MainWindow::on_backwardButton_clicked()
 {
-    qint64 currentPosition = mediaPlayer->position();
-    qint64 newPosition = currentPosition - seekAmount;
-    if (newPosition < 0)
-    {
-        newPosition = 0;
-    }
+    qint64 newPosition = mediaPlayer->position() - params::SEEK_AMOUNT;
+    newPosition = newPosition < 0 ? 0 : newPosition;
     mediaPlayer->setPosition(newPosition);
 }
 
 void MainWindow::on_forwardButton_clicked()
 {
-    qint64 currentPosition = mediaPlayer->position();
-    qint64 newPosition = currentPosition + seekAmount;
-    if (newPosition > mediaPlayer->duration())
-    {
-        newPosition = mediaPlayer->duration();
-    }
+    qint64 newPosition = mediaPlayer->position() + params::SEEK_AMOUNT;
+    newPosition = newPosition > mediaPlayer->duration() ? mediaPlayer->duration() : newPosition;
     mediaPlayer->setPosition(newPosition);
 }
 

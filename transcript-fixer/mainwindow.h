@@ -51,7 +51,6 @@ private:
     Ui::MainWindow *ui;
     bool isPlaying;
     bool isMuted;
-    qint64 seekAmount;
     QMediaPlayer *mediaPlayer;
     QAudioOutput *audioOutput;
     std::vector<Element*> transcriptionElements;
