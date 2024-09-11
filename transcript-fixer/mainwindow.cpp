@@ -25,6 +25,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->volumeSlider->setRange(0, 100);
     ui->volumeSlider->setValue(50);
 
+    // Configure the Table Widget
+    ui->tableWidget->setGridStyle(Qt::NoPen);
+    ui->tableWidget->setAlternatingRowColors(true);
+
     // Configure speedComboBox
     ui->speedComboBox->addItem("0.5x", 0.5);
     ui->speedComboBox->addItem("1.0x", 1.0);

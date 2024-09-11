@@ -99,7 +99,7 @@
           </property>
           <property name="iconSize">
            <size>
-            <width>32</width>
+            <width>25</width>
             <height>16</height>
            </size>
           </property>
@@ -118,7 +118,7 @@
           </property>
           <property name="iconSize">
            <size>
-            <width>32</width>
+            <width>25</width>
             <height>16</height>
            </size>
           </property>
@@ -133,6 +133,70 @@
     </item>
     <item>
      <widget class="QTableWidget" name="tableWidget">
+      <property name="styleSheet">
+       <string notr="true">/* General TableWidget Styling */
+QTableWidget {
+    border: 1px solid #4A90E2;  /* Light blue border for the whole table */
+    background-color: #F5F5F5;  /* Light grey background */
+    gridline-color: #D0D0D0;    /* Light grey grid lines */
+    alternate-background-color: #E9F7FD;  /* Alternating row background for better readability */
+    selection-background-color: #4A90E2;  /* Blue highlight for selected rows */
+    selection-color: white;  /* White text for selected rows */
+    padding: 5px;
+}
+
+/* Header Styling */
+QHeaderView::section {
+    background-color: #4A90E2;  /* Blue header background */
+    color: white;  /* White text */
+    font-weight: bold;  /* Bold text in headers */
+    border: 1px solid #D0D0D0;  /* Borders between header sections */
+    padding: 5px;
+}
+
+/* Specific Styling for Columns */
+QTableWidget::item {
+    border: none;   /* No individual cell borders */
+}
+
+/* Start and End Columns (Timestamps) */
+QTableWidget::item:nth-child(1), QTableWidget::item:nth-child(2) {
+    background-color: #FFFFFF;  /* White background for timestamp columns */
+    font-family: &quot;Courier New&quot;, monospace;  /* Monospaced font for better timestamp readability */
+    text-align: center;  /* Center align timestamps */
+}
+
+/* Text Column */
+QTableWidget::item:nth-child(3) {
+    background-color: #F5F5F5;  /* Slightly different shade for the text column */
+    font-family: &quot;Arial&quot;, sans-serif;  /* Default sans-serif font for text */
+    color: #333333;  /* Dark grey text for better readability */
+}
+
+/* Selected Row Styling */
+QTableWidget::item:selected {
+    background-color: #4A90E2;  /* Highlight the selected row */
+    color: white;  /* White text when selected */
+}
+
+/* Hover Effect */
+QTableWidget::item:hover {
+    background-color: #DAECF8;  /* Light blue hover effect */
+}
+
+/* Scrollbar Styling */
+QScrollBar:vertical {
+    border: 1px solid #D0D0D0;
+    background-color: #F5F5F5;
+    width: 12px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #4A90E2;  /* Blue scrollbar handle */
+    min-height: 20px;
+}
+</string>
+      </property>
       <column>
        <property name="text">
         <string>Start</string>
@@ -282,8 +346,8 @@
         </property>
         <property name="iconSize">
          <size>
-          <width>20</width>
-          <height>20</height>
+          <width>25</width>
+          <height>25</height>
          </size>
         </property>
         <property name="shortcut">

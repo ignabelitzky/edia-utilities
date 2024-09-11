@@ -18,6 +18,7 @@ namespace utils {
     qint64 extract_start_time(const QString &text);
     qint64 extract_end_time(const QString &text);
     Element* extract_transcription_data(const QString &line);
+
 }
 
 #endif // UTILS_H
