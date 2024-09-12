@@ -295,8 +295,7 @@ void MainWindow::on_actionUsage_instructions_triggered()
 void MainWindow::on_actionAbout_TranscriptFixer_triggered()
 {
     QString aboutText =
-        "TranscriptFixer Application\n\n"
-        "Version 1.0\n\n"
+        params::APP_NAME + " - " + params::APP_VERSION + "\n\n"
         "Developed by Ignacio Belitzky\n"
         "This application allows users to correct and edit transcription text with timestamps.\n"
         "Features include media playback synchronization with transcriptions, text search, undo/redo functionality, and more.\n\n"
