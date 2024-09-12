@@ -49,8 +49,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    bool isPlaying;
-    bool isMuted;
     QMediaPlayer *mediaPlayer;
     QAudioOutput *audioOutput;
     std::vector<Element*> transcriptionElements;

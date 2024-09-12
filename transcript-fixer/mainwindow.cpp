@@ -4,7 +4,7 @@
 #include "params.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), isPlaying(false), isMuted(false)
+    : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
@@ -30,10 +30,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tableWidget->setAlternatingRowColors(true);
 
     // Configure speedComboBox
-    ui->speedComboBox->addItem("0.5x", 0.5);
-    ui->speedComboBox->addItem("1.0x", 1.0);
-    ui->speedComboBox->addItem("1.5x", 1.5);
-    ui->speedComboBox->addItem("2.0x", 2.0);
+    for (size_t i = 0; i < params::speeds.size(); ++i)
+    {
+        ui->speedComboBox->addItem(params::speeds.at(i).first, params::speeds.at(i).second);
+    }
 
     // Set default speed (1.0x)
     ui->speedComboBox->setCurrentIndex(1);
@@ -64,30 +64,29 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_volumeButton_clicked()
 {
-    isMuted = !isMuted;
-    ui->volumeButton->setIcon(style()->standardIcon(isMuted ? QStyle::SP_MediaVolumeMuted : QStyle::SP_MediaVolume));
-    audioOutput->setMuted(isMuted);
+    bool isMuted = audioOutput->isMuted();
+    ui->volumeButton->setIcon(style()->standardIcon(isMuted ? QStyle::SP_MediaVolume : QStyle::SP_MediaVolumeMuted));
+    audioOutput->setMuted(!isMuted);
 }
 
 void MainWindow::on_playButton_clicked()
 {
-    isPlaying = !isPlaying;
-    if(isPlaying)
+    if (!mediaPlayer->isPlaying())
     {
-        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
         mediaPlayer->play();
+        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
     }
     else
     {
-        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
         mediaPlayer->pause();
+        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     }
 }
 
 void MainWindow::on_playbackSpeedChanged(int index)
 {
     Q_UNUSED(index);
-    double speed = ui->speedComboBox->currentData().toDouble();
+    qreal speed = ui->speedComboBox->currentData().toReal();
     mediaPlayer->setPlaybackRate(speed);
 }
 
@@ -113,7 +112,6 @@ void MainWindow::handle_media_status_changed(QMediaPlayer::MediaStatus status)
     if (status == QMediaPlayer::EndOfMedia)
     {
         ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-        isPlaying = false;
         mediaPlayer->setPosition(0);
     }
 }
