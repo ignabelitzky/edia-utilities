@@ -12,6 +12,7 @@ namespace params {
                                                             std::make_pair(QString("1.0x"), 1.0f),
                                                             std::make_pair(QString("1.5x"), 1.5f),
                                                             std::make_pair(QString("2.0x"), 2.0f) };
+    const float DEFAULT_VOLUME = 0.5f;
 }
 
 #endif // PARAMS_H

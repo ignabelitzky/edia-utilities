@@ -2,140 +2,96 @@
 #include "ui_mainwindow.h"
 #include "include/utils.h"
 #include "include/params.h"
+#include <QMessageBox>
+#include <QFileDialog>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent), ui(new Ui::MainWindow), mediaControl(new MediaControl(this))
+
 {
     ui->setupUi(this);
-
-    // Set the window to maximized mode
-    this->showMaximized();
-
-    // Set the window title
-    this->setWindowTitle("TranscriptFixer");
-
-    // Initialize media player and audio output
-    disable_media_interface();
-    mediaPlayer = new QMediaPlayer(this);
-    audioOutput = new QAudioOutput(this);
-    mediaPlayer->setAudioOutput(audioOutput);
-
-    // Set default volume
-    audioOutput->setVolume(0.5);
-    ui->volumeSlider->setRange(0, 100);
-    ui->volumeSlider->setValue(50);
-
-    // Configure the Table Widget
-    ui->tableWidget->setGridStyle(Qt::NoPen);
-    ui->tableWidget->setAlternatingRowColors(true);
-
-    // Configure speedComboBox
-    for (size_t i = 0; i < params::speeds.size(); ++i)
-    {
-        ui->speedComboBox->addItem(params::speeds.at(i).first, params::speeds.at(i).second);
-    }
-
-    // Set default speed (1.0x)
-    ui->speedComboBox->setCurrentIndex(1);
-
-    // Initialize media label and transcription label
-    update_media_label("");
-    update_transcription_label("");
-
-    // Connect signals to slots
+    transcriptionManager = new TranscriptionManager(this, ui->tableWidget);
+    initialize_ui();
     connect_signals();
-
-    // Set default icons
-    set_default_icons();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete mediaPlayer;
-    delete audioOutput;
+    delete mediaControl;
+    delete transcriptionManager;
+}
 
-    for (Element* elem : transcriptionElements)
+void MainWindow::initialize_ui()
+{
+    this->showMaximized();
+    this->setWindowTitle(params::APP_NAME);
+
+    ui->volumeSlider->setRange(0, 100);
+    ui->volumeSlider->setValue(params::DEFAULT_VOLUME);
+
+    // Configure Table
+    ui->tableWidget->setGridStyle(Qt::NoPen);
+    ui->tableWidget->setAlternatingRowColors(true);
+
+    // Configure Speed ComboBox
+    for (const auto &speed : params::speeds)
     {
-        delete elem;
+        ui->speedComboBox->addItem(speed.first, speed.second);
     }
-    transcriptionElements.clear();
+    ui->speedComboBox->setCurrentIndex(1);
+
+    // Set default icons
+    set_default_icons();
+
+    this->update_media_label("");
+    this->update_transcription_label("");
+
+    this->disable_media_interface();
 }
 
-void MainWindow::on_volumeButton_clicked()
+void MainWindow::connect_signals()
 {
-    bool isMuted = audioOutput->isMuted();
-    ui->volumeButton->setIcon(style()->standardIcon(isMuted ? QStyle::SP_MediaVolume : QStyle::SP_MediaVolumeMuted));
-    audioOutput->setMuted(!isMuted);
+    connect(ui->speedComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::on_playbackSpeedChanged);
+    connect(ui->volumeSlider, &QSlider::valueChanged, this, &MainWindow::update_volume);
+    connect(mediaControl->get_media_player(), &QMediaPlayer::positionChanged, this, &MainWindow::update_position);
+    connect(mediaControl->get_media_player(), &QMediaPlayer::durationChanged, this, &MainWindow::update_duration);
+    connect(ui->audioSlider, &QSlider::sliderMoved, mediaControl->get_media_player(),&QMediaPlayer::setPosition);
+    connect(mediaControl->get_media_player(), &QMediaPlayer::mediaStatusChanged, this, &MainWindow::handle_media_status_changed);
+    connect(ui->backwardButton, &QPushButton::clicked, this, &MainWindow::on_backwardButton_clicked);
+    connect(ui->forwardButton, &QPushButton::clicked, this, &MainWindow::on_forwardButton_clicked);
+    connect(ui->tableWidget, &QTableWidget::itemClicked, this, &MainWindow::jump_to_time);
+    connect(ui->addButton, &QPushButton::clicked, this, &MainWindow::add_row);
+    connect(ui->deleteButton, &QPushButton::clicked, this, &MainWindow::delete_row);
 }
 
-void MainWindow::on_playButton_clicked()
+void MainWindow::set_default_icons()
 {
-    if (!mediaPlayer->isPlaying())
-    {
-        mediaPlayer->play();
-        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
-    }
-    else
-    {
-        mediaPlayer->pause();
-        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-    }
+    ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    ui->volumeButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
+    ui->backwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekBackward));
+    ui->forwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
+
+    ui->playButton->setToolTip("Play/Pause");
+    ui->backwardButton->setToolTip("Backward");
+    ui->forwardButton->setToolTip("Forward");
+    ui->volumeButton->setToolTip("Mute/Unmute");
+    ui->addButton->setToolTip("Add row");
+    ui->deleteButton->setToolTip("Remove row");
 }
 
-void MainWindow::on_playbackSpeedChanged(int index)
+void MainWindow::enable_media_interface()
 {
-    Q_UNUSED(index);
-    qreal speed = ui->speedComboBox->currentData().toReal();
-    mediaPlayer->setPlaybackRate(speed);
+    ui->backwardButton->setEnabled(true);
+    ui->forwardButton->setEnabled(true);
+    ui->playButton->setEnabled(true);
 }
 
-void MainWindow::update_volume(int value)
+void MainWindow::disable_media_interface()
 {
-    audioOutput->setVolume(pow(value / 100.0, 2));  // Apply exponential scaling
-}
-
-void MainWindow::update_position(qint64 position)
-{
-    ui->audioSlider->setValue(static_cast<int>(position));
-    ui->currentTimeLabel->setText(utils::format_time(position));
-}
-
-void MainWindow::update_duration(qint64 duration)
-{
-    ui->audioSlider->setRange(0, static_cast<int>(duration));
-    ui->totalDurationLabel->setText(utils::format_time(duration));
-}
-
-void MainWindow::handle_media_status_changed(QMediaPlayer::MediaStatus status)
-{
-    if (status == QMediaPlayer::EndOfMedia)
-    {
-        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-        mediaPlayer->setPosition(0);
-    }
-}
-
-void MainWindow::jump_to_time(QTableWidgetItem *item)
-{
-    int row = item->row();
-    QString startTimeString = ui->tableWidget->item(row, 0)->text();
-    qint64 timeInMs = utils::convert_time_to_ms(startTimeString);
-    mediaPlayer->setPosition(timeInMs);
-}
-
-void MainWindow::on_backwardButton_clicked()
-{
-    qint64 newPosition = mediaPlayer->position() - params::SEEK_AMOUNT;
-    newPosition = newPosition < 0 ? 0 : newPosition;
-    mediaPlayer->setPosition(newPosition);
-}
-
-void MainWindow::on_forwardButton_clicked()
-{
-    qint64 newPosition = mediaPlayer->position() + params::SEEK_AMOUNT;
-    newPosition = newPosition > mediaPlayer->duration() ? mediaPlayer->duration() : newPosition;
-    mediaPlayer->setPosition(newPosition);
+    ui->backwardButton->setEnabled(false);
+    ui->forwardButton->setEnabled(false);
+    ui->playButton->setEnabled(false);
 }
 
 void MainWindow::update_media_label(const QString &fileName)
@@ -164,6 +120,83 @@ void MainWindow::update_transcription_label(const QString &fileName)
         ui->transcriptionFilenameLabel->setText(fileName);
         ui->transcriptionFilenameLabel->setStyleSheet("");
     }
+}
+
+void MainWindow::on_volumeButton_clicked()
+{
+    bool isMuted = mediaControl->is_muted();
+    ui->volumeButton->setIcon(style()->standardIcon(isMuted ? QStyle::SP_MediaVolume : QStyle::SP_MediaVolumeMuted));
+    mediaControl->mute(!isMuted);
+}
+
+void MainWindow::on_playButton_clicked()
+{
+    if (!mediaControl->is_playing())
+    {
+        mediaControl->play();
+        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+    }
+    else
+    {
+        mediaControl->pause();
+        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    }
+}
+
+void MainWindow::on_playbackSpeedChanged(int index)
+{
+    Q_UNUSED(index);
+    qreal rate = ui->speedComboBox->currentData().toReal();
+    mediaControl->set_playback_rate(rate);
+}
+
+void MainWindow::update_volume(int value)
+{
+    mediaControl->set_volume(value);
+}
+
+void MainWindow::update_position(qint64 position)
+{
+    ui->audioSlider->setValue(static_cast<int>(position));
+    ui->currentTimeLabel->setText(utils::format_time(position));
+}
+
+void MainWindow::update_duration(qint64 duration)
+{
+    ui->audioSlider->setRange(0, static_cast<int>(duration));
+    ui->totalDurationLabel->setText(utils::format_time(duration));
+}
+
+void MainWindow::handle_media_status_changed(QMediaPlayer::MediaStatus status)
+{
+    if (status == QMediaPlayer::EndOfMedia)
+    {
+        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+        mediaControl->set_position(0);
+    }
+}
+
+void MainWindow::jump_to_time(QTableWidgetItem *item)
+{
+    int row = item->row();
+    QString startTimeString = ui->tableWidget->item(row, 0)->text();
+    qint64 timeInMs = utils::convert_time_to_ms(startTimeString);
+    mediaControl->set_position(timeInMs);
+}
+
+void MainWindow::on_backwardButton_clicked()
+{
+    qint64 newPosition = mediaControl->get_position() - params::SEEK_AMOUNT;
+    newPosition = newPosition < 0 ? 0 : newPosition;
+    mediaControl->set_position(newPosition);
+}
+
+void MainWindow::on_forwardButton_clicked()
+{
+    qint64 newPosition = mediaControl->get_position() + params::SEEK_AMOUNT;
+    qint64 duration = mediaControl->get_duration();
+    newPosition = newPosition > duration ? duration : newPosition;
+    mediaControl->set_position(newPosition);
 }
 
 void MainWindow::add_row()
@@ -211,7 +244,7 @@ void MainWindow::on_actionOpen_audio_video_file_triggered()
     // Check if a file was selected
     if (!filePath.isEmpty())
     {
-        mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
+        mediaControl->set_source(QUrl::fromLocalFile(filePath));
 
         // Extract the base name of the file
         QFileInfo fileInfo(filePath);
@@ -235,7 +268,7 @@ void MainWindow::on_actionLoad_transcription_file_triggered()
     // Check if a file was selected
     if (!filePath.isEmpty())
     {
-        load_transcription_file(filePath);
+        transcriptionManager->load_transcription(filePath);
         QFileInfo fileInfo(filePath);
         update_transcription_label(fileInfo.fileName());
     }
@@ -254,7 +287,7 @@ void MainWindow::on_actionSave_transcription_triggered()
     // Check if a file was selected
     if (!filePath.isEmpty())
     {
-        save_transcription_file(filePath);
+        transcriptionManager->save_transcription(filePath);
     }
 }
 
@@ -307,133 +340,6 @@ void MainWindow::on_actionAbout_TranscriptFixer_triggered()
 void MainWindow::on_actionExit_triggered()
 {
     QApplication::quit();
-}
-
-void MainWindow::connect_signals()
-{
-    connect(ui->speedComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::on_playbackSpeedChanged);
-    connect(ui->volumeSlider, &QSlider::valueChanged, this, &MainWindow::update_volume);
-    connect(mediaPlayer, &QMediaPlayer::positionChanged, this, &MainWindow::update_position);
-    connect(mediaPlayer, &QMediaPlayer::durationChanged, this, &MainWindow::update_duration);
-    connect(ui->audioSlider, &QSlider::sliderMoved, mediaPlayer,&QMediaPlayer::setPosition);
-    connect(mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, &MainWindow::handle_media_status_changed);
-    connect(ui->backwardButton, &QPushButton::clicked, this, &MainWindow::on_backwardButton_clicked);
-    connect(ui->forwardButton, &QPushButton::clicked, this, &MainWindow::on_forwardButton_clicked);
-    connect(ui->tableWidget, &QTableWidget::itemClicked, this, &MainWindow::jump_to_time);
-    connect(ui->addButton, &QPushButton::clicked, this, &MainWindow::add_row);
-    connect(ui->deleteButton, &QPushButton::clicked, this, &MainWindow::delete_row);
-}
-
-void MainWindow::set_default_icons()
-{
-    ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-    ui->volumeButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
-    ui->backwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekBackward));
-    ui->forwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
-
-    ui->playButton->setToolTip("Play");
-    ui->backwardButton->setToolTip("Backward");
-    ui->forwardButton->setToolTip("Forward");
-    ui->volumeButton->setToolTip("Mute/Unmute");
-    ui->addButton->setToolTip("Add row");
-    ui->deleteButton->setToolTip("Remove row");
-}
-
-void MainWindow::populate_table()
-{
-    // Clear the transcription text if any
-    ui->tableWidget->clearContents();
-    ui->tableWidget->setRowCount(0);
-
-    ui->tableWidget->setRowCount(transcriptionElements.size());
-    for (unsigned long i = 0; i < transcriptionElements.size(); ++i)
-    {
-        const Element* elem = transcriptionElements[i];
-        ui->tableWidget->setItem(i, 0, new QTableWidgetItem(elem->startTime));
-        ui->tableWidget->setItem(i, 1, new QTableWidgetItem(elem->endTime));
-        ui->tableWidget->setItem(i, 2, new QTableWidgetItem(elem->text));
-    }
-}
-
-void MainWindow::load_transcription_file(const QString &filePath)
-{
-    QFile file(filePath);
-
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        QMessageBox::warning(this, "Error", "Failed to open the file.");
-        return;
-    }
-
-    QTextStream in(&file);
-
-    // Clear any previous transcription
-    for (Element* elem : transcriptionElements)
-    {
-        delete elem;
-    }
-    transcriptionElements.clear();
-
-    while (!in.atEnd())
-    {
-        QString line = in.readLine();
-        if (!line.isEmpty()) {
-            transcriptionElements.push_back(utils::extract_transcription_data(line));
-        }
-    }
-    file.close();
-
-    populate_table();
-    ui->tableWidget->resizeColumnsToContents();
-}
-
-void MainWindow::save_transcription_file(const QString &filePath)
-{
-    QFile file(filePath);
-
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
-        QMessageBox::warning(this, "Error", "Failed to save the file.");
-        return;
-    }
-
-    QTextStream out(&file);
-
-    // Iterate through all rows
-    int rowCount = ui->tableWidget->rowCount();
-    for (int i = 0; i < rowCount; ++i)
-    {
-        // Get the values from each column in the row
-        QTableWidgetItem *startTimeItem = ui->tableWidget->item(i, 0);
-        QTableWidgetItem *endTimeItem = ui->tableWidget->item(i, 1);
-        QTableWidgetItem *textItem = ui->tableWidget->item(i, 2);
-
-        QString startTime = startTimeItem ? startTimeItem->text() : "";
-        QString endTime = endTimeItem ? endTimeItem->text() : "";
-        QString text = textItem ? textItem->text() : "";
-
-        // Format the line in the desired format
-        QString line = QString("[%1 - %2] %3").arg(startTime, endTime, text);
-
-        // Write the line to the file
-        out << line << "\n";
-    }
-
-    file.close();
-}
-
-void MainWindow::enable_media_interface()
-{
-    ui->backwardButton->setEnabled(true);
-    ui->forwardButton->setEnabled(true);
-    ui->playButton->setEnabled(true);
-}
-
-void MainWindow::disable_media_interface()
-{
-    ui->backwardButton->setEnabled(false);
-    ui->forwardButton->setEnabled(false);
-    ui->playButton->setEnabled(false);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

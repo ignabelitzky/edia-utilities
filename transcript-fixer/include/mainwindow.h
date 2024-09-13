@@ -1,14 +1,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "include/mediacontrol.h"
+#include "include/transcriptionmanager.h"
 #include <QMainWindow>
-#include <QtMultimedia>
-#include <QStyle>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QAbstractItemView>
 #include <QTableWidgetItem>
-#include "utils.h"
+#include <QCloseEvent>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -24,6 +21,20 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private:
+    Ui::MainWindow *ui;
+    MediaControl *mediaControl;
+    TranscriptionManager *transcriptionManager;
+
+    void initialize_ui();
+    void connect_signals();
+    void set_default_icons();
+
+    void enable_media_interface();
+    void disable_media_interface();
+    void update_media_label(const QString &fileName);
+    void update_transcription_label(const QString &fileName);
+
 private slots:
     void on_volumeButton_clicked();
     void on_playButton_clicked();
@@ -35,8 +46,6 @@ private slots:
     void jump_to_time(QTableWidgetItem *item);
     void on_backwardButton_clicked();
     void on_forwardButton_clicked();
-    void update_media_label(const QString &fileName);
-    void update_transcription_label(const QString &fileName);
     void add_row();
     void delete_row();
     void on_actionOpen_audio_video_file_triggered();
@@ -46,19 +55,6 @@ private slots:
     void on_actionExit_triggered();
     void on_actionUsage_instructions_triggered();
     void on_actionAbout_TranscriptFixer_triggered();
-
-private:
-    Ui::MainWindow *ui;
-    QMediaPlayer *mediaPlayer;
-    QAudioOutput *audioOutput;
-    std::vector<Element*> transcriptionElements;
-    void connect_signals();
-    void set_default_icons();
-    void populate_table();
-    void load_transcription_file(const QString &filePath);
-    void save_transcription_file(const QString &filePath);
-    void enable_media_interface();
-    void disable_media_interface();
 
 protected:
     void closeEvent(QCloseEvent *event) override;

@@ -13,11 +13,15 @@ QMAKE_CXXFLAGS += -Wall -Wextra
 SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
+    src/mediacontrol.cpp \
+    src/transcriptionmanager.cpp \
     src/utils.cpp
 
 HEADERS += \
     include/mainwindow.h \
+    include/mediacontrol.h \
     include/params.h \
+    include/transcriptionmanager.h \
     include/utils.h
 
 FORMS += \
