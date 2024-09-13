@@ -11,8 +11,15 @@ def format_timestamp(seconds):
 
 def transcribe_audio(wav_file, save_path, model_name, language):
     """Transcribe the audio using Whisper and save it with formatted timestamps."""
-    model = whisper.load_model(model_name)
-    result = model.transcribe(wav_file, language=language, verbose=False)
+    try:
+        model = whisper.load_model(model_name)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load Whisper model: {e}")
+    
+    try:
+        result = model.transcribe(wav_file, language=language, verbose=False)
+    except Exception as e:
+        raise RuntimeError(f"Failed to transcribe audio: {e}")
 
     # Save the transcription with timestamps
     with open(save_path, "w") as file:
