@@ -24,37 +24,45 @@ public:
 private:
     Ui::MainWindow *ui;
     MediaControl *mediaControl;
+    QVector<QAction*> fileActions;
+    QVector<QAction*> editActions;
+    QVector<QAction*> helpActions;
     TranscriptionManager *transcriptionManager;
 
     void initialize_ui();
     void connect_signals();
     void set_default_icons();
+    void cleanup_actions();
 
     void enable_media_interface();
     void disable_media_interface();
     void update_media_label(const QString &fileName);
     void update_transcription_label(const QString &fileName);
+    void set_menu_actions();
+    void set_menu_connections();
 
 private slots:
-    void on_volumeButton_clicked();
-    void on_playButton_clicked();
-    void on_playbackSpeedChanged(int index);
-    void update_volume(int value);
-    void update_position(qint64 position);
-    void update_duration(qint64 duration);
+    void volume_button_clicked();
+    void play_button_clicked();
+    void change_playback_rate();
+    void update_media_volume(int value);
+    void update_audio_slider_position(qint64 position);
+    void update_audio_slider_duration(qint64 duration);
     void handle_media_status_changed(QMediaPlayer::MediaStatus status);
     void jump_to_time(QTableWidgetItem *item);
-    void on_backwardButton_clicked();
-    void on_forwardButton_clicked();
+    void backward_button_clicked();
+    void forward_button_clicked();
     void add_row();
     void delete_row();
-    void on_actionOpen_audio_video_file_triggered();
-    void on_actionLoad_transcription_file_triggered();
-    void on_actionSave_transcription_triggered();
-    void on_actionShortcuts_triggered();
-    void on_actionExit_triggered();
-    void on_actionUsage_instructions_triggered();
-    void on_actionAbout_TranscriptFixer_triggered();
+
+    // Actions slots
+    void open_media_file();
+    void load_transcription_file();
+    void save_transcription();
+    void quit_application();
+    void show_shortcuts();
+    void show_instructions();
+    void show_about();
 
 protected:
     void closeEvent(QCloseEvent *event) override;

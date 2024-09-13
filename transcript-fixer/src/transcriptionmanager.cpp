@@ -28,7 +28,13 @@ void TranscriptionManager::load_transcription(const QString &filePath)
     }
 
     QTextStream in(&file);
+
+    for (Element* elem : transcriptionElements)
+    {
+        delete elem;
+    }
     transcriptionElements.clear();
+
     while (!in.atEnd())
     {
         QString line = in.readLine();
@@ -37,6 +43,7 @@ void TranscriptionManager::load_transcription(const QString &filePath)
             transcriptionElements.push_back(utils::extract_transcription_data(line));
         }
     }
+
     file.close();
     populate_table();
 }

@@ -20,6 +20,7 @@ MainWindow::~MainWindow()
     delete ui;
     delete mediaControl;
     delete transcriptionManager;
+    this->cleanup_actions();
 }
 
 void MainWindow::initialize_ui()
@@ -48,18 +49,22 @@ void MainWindow::initialize_ui()
     this->update_transcription_label("");
 
     this->disable_media_interface();
+
+    this->set_menu_actions();
 }
 
 void MainWindow::connect_signals()
 {
-    connect(ui->speedComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::on_playbackSpeedChanged);
-    connect(ui->volumeSlider, &QSlider::valueChanged, this, &MainWindow::update_volume);
-    connect(mediaControl->get_media_player(), &QMediaPlayer::positionChanged, this, &MainWindow::update_position);
-    connect(mediaControl->get_media_player(), &QMediaPlayer::durationChanged, this, &MainWindow::update_duration);
+    connect(ui->playButton, &QPushButton::clicked, this, &MainWindow::play_button_clicked);
+    connect(ui->volumeButton, &QPushButton::clicked, this, &MainWindow::volume_button_clicked);
+    connect(ui->speedComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::change_playback_rate);
+    connect(ui->volumeSlider, &QSlider::valueChanged, this, &MainWindow::update_media_volume);
+    connect(mediaControl->get_media_player(), &QMediaPlayer::positionChanged, this, &MainWindow::update_audio_slider_position);
+    connect(mediaControl->get_media_player(), &QMediaPlayer::durationChanged, this, &MainWindow::update_audio_slider_duration);
     connect(ui->audioSlider, &QSlider::sliderMoved, mediaControl->get_media_player(),&QMediaPlayer::setPosition);
     connect(mediaControl->get_media_player(), &QMediaPlayer::mediaStatusChanged, this, &MainWindow::handle_media_status_changed);
-    connect(ui->backwardButton, &QPushButton::clicked, this, &MainWindow::on_backwardButton_clicked);
-    connect(ui->forwardButton, &QPushButton::clicked, this, &MainWindow::on_forwardButton_clicked);
+    connect(ui->backwardButton, &QPushButton::clicked, this, &MainWindow::backward_button_clicked);
+    connect(ui->forwardButton, &QPushButton::clicked, this, &MainWindow::forward_button_clicked);
     connect(ui->tableWidget, &QTableWidget::itemClicked, this, &MainWindow::jump_to_time);
     connect(ui->addButton, &QPushButton::clicked, this, &MainWindow::add_row);
     connect(ui->deleteButton, &QPushButton::clicked, this, &MainWindow::delete_row);
@@ -78,6 +83,27 @@ void MainWindow::set_default_icons()
     ui->volumeButton->setToolTip("Mute/Unmute");
     ui->addButton->setToolTip("Add row");
     ui->deleteButton->setToolTip("Remove row");
+}
+
+void MainWindow::cleanup_actions()
+{
+    for (QAction* action : fileActions)
+    {
+        delete action;
+    }
+    fileActions.clear();
+
+    for (QAction* action : editActions)
+    {
+        delete action;
+    }
+    editActions.clear();
+
+    for (QAction* action : helpActions)
+    {
+        delete action;
+    }
+    helpActions.clear();
 }
 
 void MainWindow::enable_media_interface()
@@ -122,14 +148,57 @@ void MainWindow::update_transcription_label(const QString &fileName)
     }
 }
 
-void MainWindow::on_volumeButton_clicked()
+void MainWindow::set_menu_actions()
+{
+    // File Actions
+    fileActions.push_back(new QAction(tr("&Open Media File"), this));
+    fileActions.last()->setShortcut(QKeySequence::Open);
+    fileActions.push_back(new QAction(tr("&Load Transcription File"), this));
+    fileActions.last()->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_L));
+    fileActions.push_back(new QAction(tr("&Save Transcription"), this));
+    fileActions.last()->setShortcut(QKeySequence::Save);
+    fileActions.push_back(new QAction(tr("&Quit Application"), this));
+    fileActions.last()->setShortcut((QKeySequence::Quit));
+    for (QAction* action : fileActions)
+    {
+        ui->menuFile->addAction(action);
+    }
+
+    // Help Actions
+    helpActions.push_back(new QAction(tr("Shortcuts"), this));
+    helpActions.push_back(new QAction(tr("Usage Instructions"), this));
+    helpActions.push_back(new QAction(tr("About %1").arg(params::APP_NAME), this));
+    for (QAction* action : helpActions)
+    {
+        ui->menuHelp->addAction(action);
+    }
+
+    // Make the connections
+    this->set_menu_connections();
+}
+
+void MainWindow::set_menu_connections()
+{
+    // File connections
+    connect(fileActions.at(0), &QAction::triggered, this, &MainWindow::open_media_file);
+    connect(fileActions.at(1), &QAction::triggered, this, &MainWindow::load_transcription_file);
+    connect(fileActions.at(2), &QAction::triggered, this, &MainWindow::save_transcription);
+    connect(fileActions.at(3), &QAction::triggered, this, &MainWindow::quit_application);
+
+    // Help connections
+    connect(helpActions.at(0), &QAction::triggered, this, &MainWindow::show_shortcuts);
+    connect(helpActions.at(1), &QAction::triggered, this, &MainWindow::show_instructions);
+    connect(helpActions.at(2), &QAction::triggered, this, &MainWindow::show_about);
+}
+
+void MainWindow::volume_button_clicked()
 {
     bool isMuted = mediaControl->is_muted();
     ui->volumeButton->setIcon(style()->standardIcon(isMuted ? QStyle::SP_MediaVolume : QStyle::SP_MediaVolumeMuted));
     mediaControl->mute(!isMuted);
 }
 
-void MainWindow::on_playButton_clicked()
+void MainWindow::play_button_clicked()
 {
     if (!mediaControl->is_playing())
     {
@@ -143,25 +212,24 @@ void MainWindow::on_playButton_clicked()
     }
 }
 
-void MainWindow::on_playbackSpeedChanged(int index)
+void MainWindow::change_playback_rate()
 {
-    Q_UNUSED(index);
     qreal rate = ui->speedComboBox->currentData().toReal();
     mediaControl->set_playback_rate(rate);
 }
 
-void MainWindow::update_volume(int value)
+void MainWindow::update_media_volume(int value)
 {
     mediaControl->set_volume(value);
 }
 
-void MainWindow::update_position(qint64 position)
+void MainWindow::update_audio_slider_position(qint64 position)
 {
     ui->audioSlider->setValue(static_cast<int>(position));
     ui->currentTimeLabel->setText(utils::format_time(position));
 }
 
-void MainWindow::update_duration(qint64 duration)
+void MainWindow::update_audio_slider_duration(qint64 duration)
 {
     ui->audioSlider->setRange(0, static_cast<int>(duration));
     ui->totalDurationLabel->setText(utils::format_time(duration));
@@ -184,14 +252,14 @@ void MainWindow::jump_to_time(QTableWidgetItem *item)
     mediaControl->set_position(timeInMs);
 }
 
-void MainWindow::on_backwardButton_clicked()
+void MainWindow::backward_button_clicked()
 {
     qint64 newPosition = mediaControl->get_position() - params::SEEK_AMOUNT;
     newPosition = newPosition < 0 ? 0 : newPosition;
     mediaControl->set_position(newPosition);
 }
 
-void MainWindow::on_forwardButton_clicked()
+void MainWindow::forward_button_clicked()
 {
     qint64 newPosition = mediaControl->get_position() + params::SEEK_AMOUNT;
     qint64 duration = mediaControl->get_duration();
@@ -234,7 +302,7 @@ void MainWindow::delete_row()
     }
 }
 
-void MainWindow::on_actionOpen_audio_video_file_triggered()
+void MainWindow::open_media_file()
 {
     QString filePath = QFileDialog::getOpenFileName(this,
                                                     "Select Audio or Video file",
@@ -259,7 +327,7 @@ void MainWindow::on_actionOpen_audio_video_file_triggered()
     }
 }
 
-void MainWindow::on_actionLoad_transcription_file_triggered()
+void MainWindow::load_transcription_file()
 {
     QString filePath = QFileDialog::getOpenFileName(this,
                                                     "Open Transcription File",
@@ -278,7 +346,7 @@ void MainWindow::on_actionLoad_transcription_file_triggered()
     }
 }
 
-void MainWindow::on_actionSave_transcription_triggered()
+void MainWindow::save_transcription()
 {
     QString filePath = QFileDialog::getSaveFileName(this,
                                                     "Save Transcription File",
@@ -291,7 +359,12 @@ void MainWindow::on_actionSave_transcription_triggered()
     }
 }
 
-void MainWindow::on_actionShortcuts_triggered()
+void MainWindow::quit_application()
+{
+    QApplication::quit();
+}
+
+void MainWindow::show_shortcuts()
 {
     QString shortcutsText;
     shortcutsText += "<b>Keyboard Shortcuts</b><br><br>";
@@ -309,7 +382,7 @@ void MainWindow::on_actionShortcuts_triggered()
     QMessageBox::information(this, "Shortcuts", shortcutsText);
 }
 
-void MainWindow::on_actionUsage_instructions_triggered()
+void MainWindow::show_instructions()
 {
     QString usageText =
         "TranscriptFixer Application - Usage Instructions:\n\n"
@@ -325,7 +398,7 @@ void MainWindow::on_actionUsage_instructions_triggered()
 }
 
 
-void MainWindow::on_actionAbout_TranscriptFixer_triggered()
+void MainWindow::show_about()
 {
     QString aboutText =
         params::APP_NAME + " - " + params::APP_VERSION + "\n\n"
@@ -335,11 +408,6 @@ void MainWindow::on_actionAbout_TranscriptFixer_triggered()
         "For feedback or issues, please contact ignabelitzky@mi.unc.edu.ar.";
 
     QMessageBox::information(this, tr("About TranscriptFixer"), aboutText);
-}
-
-void MainWindow::on_actionExit_triggered()
-{
-    QApplication::quit();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

@@ -6,7 +6,7 @@ MediaControl::MediaControl(QObject *parent) : QObject(parent)
     mediaPlayer = new QMediaPlayer(this);
     audioOutput = new QAudioOutput(this);
     mediaPlayer->setAudioOutput(audioOutput);
-    audioOutput->setVolume(params::DEFAULT_VOLUME);
+    this->set_volume(params::DEFAULT_VOLUME);
 }
 
 MediaControl::~MediaControl()
