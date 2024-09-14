@@ -26,3 +26,6 @@ Thumbs.db
 
 # Ignore FFmpeg output files
 ffmpeg-out.*
+
+# Ignore .out files
+*.out
