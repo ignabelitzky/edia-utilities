@@ -6,6 +6,13 @@
 #include <fstream>
 #include <iomanip>
 
+// Function to clean a string by converting it to lowercase and removing punctuation
+void clean_string(std::string &str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    str.erase(std::remove_if(str.begin(), str.end(), ::ispunct), str.end());    // Remove punctuation
+}
+
 // Function to split a string into words
 std::vector<std::string> split_into_words(const std::string &str)
 {
@@ -14,6 +21,7 @@ std::vector<std::string> split_into_words(const std::string &str)
     std::string word;
     while (ss >> word)
     {
+        clean_string(word);
         words.push_back(word);
     }
     return words;
