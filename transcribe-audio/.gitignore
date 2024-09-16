@@ -27,7 +27,8 @@ Thumbs.db
 # Ignore FFmpeg output files
 ffmpeg-out.*
 
-# Ignore .out files
+# Ignore exec files
+wer-calculator
 *.out
 
 # VS Code
