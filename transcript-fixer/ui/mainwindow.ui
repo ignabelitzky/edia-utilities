@@ -92,7 +92,7 @@
         <item>
          <widget class="QPushButton" name="addButton">
           <property name="text">
-           <string/>
+           <string>Add row</string>
           </property>
           <property name="icon">
            <iconset theme="QIcon::ThemeIcon::ListAdd"/>
@@ -111,7 +111,7 @@
         <item>
          <widget class="QPushButton" name="deleteButton">
           <property name="text">
-           <string/>
+           <string>Delete row</string>
           </property>
           <property name="icon">
            <iconset theme="QIcon::ThemeIcon::ListRemove"/>

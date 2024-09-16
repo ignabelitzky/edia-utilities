@@ -391,7 +391,7 @@ void MainWindow::show_instructions()
         "3. Use the media player controls to play, pause, rewind, and fast-forward.\n"
         "4. Edit the transcription text directly in the grid.\n"
         "5. Use the 'Save' option to save your changes.\n"
-        "6. You can search, und, and redo changes using the provided buttons.\n\n"
+        "6. You can search, undo, and redo changes using the provided buttons.\n\n"
         "For more details, refer to the documentation or contact support.";
 
     QMessageBox::information(this, tr("Usage Instructions"), usageText);
