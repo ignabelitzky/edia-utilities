@@ -6,20 +6,26 @@
 #include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), ui(new Ui::MainWindow), mediaControl(new MediaControl(this))
+    QMainWindow(parent), ui(new Ui::MainWindow), mediaThread(new QThread(this)),
+    mediaControl(new MediaControl)
 
 {
     ui->setupUi(this);
     transcriptionManager = new TranscriptionManager(this, ui->tableWidget);
+    mediaControl->moveToThread(mediaThread);
+    mediaThread->start();
     initialize_ui();
     connect_signals();
 }
 
 MainWindow::~MainWindow()
 {
+    mediaThread->quit();
+    mediaThread->wait();
     delete ui;
     delete mediaControl;
     delete transcriptionManager;
+    delete mediaThread;
     this->cleanup_actions();
 }
 
@@ -68,6 +74,7 @@ void MainWindow::connect_signals()
     connect(ui->tableWidget, &QTableWidget::itemClicked, this, &MainWindow::jump_to_time);
     connect(ui->addButton, &QPushButton::clicked, this, &MainWindow::add_row);
     connect(ui->deleteButton, &QPushButton::clicked, this, &MainWindow::delete_row);
+    connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::save_transcription);
 }
 
 void MainWindow::set_default_icons()
@@ -82,7 +89,7 @@ void MainWindow::set_default_icons()
     ui->forwardButton->setToolTip("Forward");
     ui->volumeButton->setToolTip("Mute/Unmute");
     ui->addButton->setToolTip("Add row");
-    ui->deleteButton->setToolTip("Remove row");
+    ui->deleteButton->setToolTip("Delete row");
 }
 
 void MainWindow::cleanup_actions()
@@ -402,10 +409,10 @@ void MainWindow::show_about()
 {
     QString aboutText =
         params::APP_NAME + " - " + params::APP_VERSION + "\n\n"
-        "Developed by Ignacio Belitzky\n"
-        "This application allows users to correct and edit transcription text with timestamps.\n"
-        "Features include media playback synchronization with transcriptions, text search, undo/redo functionality, and more.\n\n"
-        "For feedback or issues, please contact ignabelitzky@mi.unc.edu.ar.";
+                                                         "Developed by Ignacio Belitzky\n"
+                                                         "This application allows users to correct and edit transcription text with timestamps.\n"
+                                                         "Features include media playback synchronization with transcriptions, text search, undo/redo functionality, and more.\n\n"
+                                                         "For feedback or issues, please contact ignabelitzky@mi.unc.edu.ar.";
 
     QMessageBox::information(this, tr("About TranscriptFixer"), aboutText);
 }
