@@ -48,7 +48,7 @@ void TranscriptionManager::load_transcription(const QString &filePath)
     populate_table();
 }
 
-void TranscriptionManager::save_transcription(const QString &filePath)
+void TranscriptionManager::save_transcription_as_txt(const QString &filePath)
 {
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -72,6 +72,34 @@ void TranscriptionManager::save_transcription(const QString &filePath)
         text = textItem ? textItem->text() : "";
 
         out << QString("[%1 - %2] %3\n").arg(startTime, endTime, text);
+    }
+
+    file.close();
+}
+
+void TranscriptionManager::save_transcription_as_srt(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        QMessageBox::warning(nullptr, "Error", "Failed tosave the file.");
+        return;
+    }
+
+    QTextStream out(&file);
+    QString startTime = "", endTime = "", text = "";
+    QTableWidgetItem *startTimeItem = nullptr, *endTimeItem = nullptr, *textItem = nullptr;
+    for (int i = 0; i < tableWidget->rowCount(); ++i)
+    {
+        startTimeItem = tableWidget->item(i, 0);
+        endTimeItem = tableWidget->item(i, 1);
+        textItem = tableWidget->item(i, 2);
+
+        startTime = startTimeItem ? startTimeItem->text() + QStringLiteral(",000") : "";
+        endTime = endTimeItem ? endTimeItem->text() + QStringLiteral(",000") : "";
+        text = textItem ? textItem->text() : "";
+
+        out << QString("%1\n%2 --> %3\n%4\n\n").arg(QString::number(i), startTime, endTime, text);
     }
 
     file.close();

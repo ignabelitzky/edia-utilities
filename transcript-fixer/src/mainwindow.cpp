@@ -355,14 +355,27 @@ void MainWindow::load_transcription_file()
 
 void MainWindow::save_transcription()
 {
+    QString filter = QStringLiteral("Text files (*.txt);;Subtitle files (*.srt)");
     QString filePath = QFileDialog::getSaveFileName(this,
                                                     "Save Transcription File",
-                                                    QDir::homePath(),
-                                                    "Text Files (*.txt);;All Files (*.*");
-    // Check if a file was selected
-    if (!filePath.isEmpty())
+                                                    QDir::homePath(), filter);
+    if (!filePath.endsWith(".txt") && !filePath.endsWith(".srt"))
     {
-        transcriptionManager->save_transcription(filePath);
+        // Default to .txt if no extension is selected
+        filePath.append(".txt");
+    }
+
+    if (filePath.endsWith(".txt"))
+    {
+        transcriptionManager->save_transcription_as_txt(filePath);
+    }
+    else if (filePath.endsWith(".srt"))
+    {
+        transcriptionManager->save_transcription_as_srt(filePath);
+    }
+    else
+    {
+        QMessageBox::warning(this, "Error", "Could not save the file.");
     }
 }
 
