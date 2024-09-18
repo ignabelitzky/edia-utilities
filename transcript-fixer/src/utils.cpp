@@ -56,14 +56,14 @@ qint64 utils::extract_end_time(const QString &text)
     return 0;
 }
 
-Element* utils::extract_transcription_data(const QString &line)
+TranscriptionElement* utils::extract_transcription_data(const QString &line)
 {
     // Define the regex pattern
     QRegularExpression re(R"(\[(\d{2}:\d{2}:\d{2})\s*-\s(\d{2}:\d{2}:\d{2})\]\s*(.*))");
     QRegularExpressionMatch match = re.match(line);
 
     // Initialize an empty Element struct
-    Element* elem = new Element;
+    TranscriptionElement* elem = new TranscriptionElement;
 
     // Check if the line matches the pattern
     if (match.hasMatch())

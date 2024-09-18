@@ -75,6 +75,9 @@ void MainWindow::connect_signals()
     connect(ui->addButton, &QPushButton::clicked, this, &MainWindow::add_row);
     connect(ui->deleteButton, &QPushButton::clicked, this, &MainWindow::delete_row);
     connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::save_transcription);
+    connect(ui->tableWidget, &QTableWidget::cellChanged, this, [this](int row, int column) {
+        transcriptionManager->change_transcription_element(row, column);
+    });
 }
 
 void MainWindow::set_default_icons()
@@ -276,6 +279,8 @@ void MainWindow::forward_button_clicked()
 
 void MainWindow::add_row()
 {
+    // Block signals to prevent cell Changed from being triggered
+    ui->tableWidget->blockSignals(true);
     int currentRow = ui->tableWidget->currentRow();
 
     if (currentRow == -1)
@@ -285,13 +290,14 @@ void MainWindow::add_row()
 
     ui->tableWidget->insertRow(currentRow);
 
-    QTableWidgetItem *startTimeItem = new QTableWidgetItem("00:00:00");
-    QTableWidgetItem *endTimeItem = new QTableWidgetItem("00:00:00");
-    QTableWidgetItem *textItem = new QTableWidgetItem("");
+    ui->tableWidget->setItem(currentRow, 0, new QTableWidgetItem("00:00:00"));
+    ui->tableWidget->setItem(currentRow, 1, new QTableWidgetItem("00:00:00"));
+    ui->tableWidget->setItem(currentRow, 2, new QTableWidgetItem(""));
 
-    ui->tableWidget->setItem(currentRow, 0, startTimeItem);
-    ui->tableWidget->setItem(currentRow, 1, endTimeItem);
-    ui->tableWidget->setItem(currentRow, 2, textItem);
+    // Re-enable signals
+    ui->tableWidget->blockSignals(false);
+
+    transcriptionManager->insert_transcription_element(currentRow);
 }
 
 void MainWindow::delete_row()
@@ -306,6 +312,7 @@ void MainWindow::delete_row()
     if (ui->tableWidget->rowCount() > 0 && currentRow >= 0 && currentRow < ui->tableWidget->rowCount())
     {
         ui->tableWidget->removeRow(currentRow);
+        transcriptionManager->remove_transcription_element(currentRow);
     }
 }
 

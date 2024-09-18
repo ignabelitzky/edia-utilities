@@ -16,12 +16,15 @@ public:
     void load_transcription(const QString &filePath);
     void save_transcription_as_txt(const QString &filePath);
     void save_transcription_as_srt(const QString &filePath);
+    void change_transcription_element(int row, int column);
+    void insert_transcription_element(int position);
+    void remove_transcription_element(int position);
 
 private:
     QTableWidget *tableWidget;
-    QVector<Element *> transcriptionElements;
+    QVector<TranscriptionElement *> transcriptionData;
 
-    void populate_table();
+    void populate_table();   
 };
 
 #endif // TRANSCRIPTIONMANAGER_H

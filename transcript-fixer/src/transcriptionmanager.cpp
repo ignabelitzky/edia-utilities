@@ -11,11 +11,11 @@ TranscriptionManager::TranscriptionManager(QObject *parent, QTableWidget *table)
 
 TranscriptionManager::~TranscriptionManager()
 {
-    for (Element* elem : transcriptionElements)
+    for (TranscriptionElement* elem : transcriptionData)
     {
         delete elem;
     }
-    transcriptionElements.clear();
+    transcriptionData.clear();
 }
 
 void TranscriptionManager::load_transcription(const QString &filePath)
@@ -29,18 +29,18 @@ void TranscriptionManager::load_transcription(const QString &filePath)
 
     QTextStream in(&file);
 
-    for (Element* elem : transcriptionElements)
+    for (TranscriptionElement* elem : transcriptionData)
     {
         delete elem;
     }
-    transcriptionElements.clear();
+    transcriptionData.clear();
 
     while (!in.atEnd())
     {
         QString line = in.readLine();
         if (!line.isEmpty())
         {
-            transcriptionElements.push_back(utils::extract_transcription_data(line));
+            transcriptionData.push_back(utils::extract_transcription_data(line));
         }
     }
 
@@ -58,20 +58,9 @@ void TranscriptionManager::save_transcription_as_txt(const QString &filePath)
     }
 
     QTextStream out(&file);
-
-    QString startTime = "", endTime = "", text = "";
-    QTableWidgetItem *startTimeItem = nullptr, *endTimeItem = nullptr, *textItem = nullptr;
-    for (int i = 0; i < tableWidget->rowCount(); ++i)
+    for (const TranscriptionElement* element : transcriptionData)
     {
-        startTimeItem = tableWidget->item(i, 0);
-        endTimeItem = tableWidget->item(i, 1);
-        textItem = tableWidget->item(i, 2);
-
-        startTime = startTimeItem ? startTimeItem->text() : "";
-        endTime = endTimeItem ? endTimeItem->text() : "";
-        text = textItem ? textItem->text() : "";
-
-        out << QString("[%1 - %2] %3\n").arg(startTime, endTime, text);
+        out << "[" << element->startTime << " - " << element->endTime << "] " << element->text << "\n";
     }
 
     file.close();
@@ -87,32 +76,71 @@ void TranscriptionManager::save_transcription_as_srt(const QString &filePath)
     }
 
     QTextStream out(&file);
-    QString startTime = "", endTime = "", text = "";
-    QTableWidgetItem *startTimeItem = nullptr, *endTimeItem = nullptr, *textItem = nullptr;
-    for (int i = 0; i < tableWidget->rowCount(); ++i)
+    qsizetype counter = 0;
+    for (const TranscriptionElement* element : transcriptionData)
     {
-        startTimeItem = tableWidget->item(i, 0);
-        endTimeItem = tableWidget->item(i, 1);
-        textItem = tableWidget->item(i, 2);
-
-        startTime = startTimeItem ? startTimeItem->text() + QStringLiteral(",000") : "";
-        endTime = endTimeItem ? endTimeItem->text() + QStringLiteral(",000") : "";
-        text = textItem ? textItem->text() : "";
-
-        out << QString("%1\n%2 --> %3\n%4\n\n").arg(QString::number(i), startTime, endTime, text);
+        out << counter << "\n";
+        out << element->startTime << " --> " << element->endTime << "\n";
+        out << element->text << "\n\n";
+        ++counter;
     }
 
     file.close();
 }
 
+void TranscriptionManager::change_transcription_element(int row, int column)
+{
+    // Ensure the row exists in the transcriptionData vector
+    if (row >= 0 && row < transcriptionData.size())
+    {
+        QTableWidgetItem* item = tableWidget->item(row, column);
+        if (item)
+        {
+            QString newValue = item->text();
+            switch (column)
+            {
+            case 0:
+                transcriptionData[row]->startTime = newValue;
+                break;
+            case 1:
+                transcriptionData[row]->endTime = newValue;
+                break;
+            case 2:
+                transcriptionData[row]->text = newValue;
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
+void TranscriptionManager::insert_transcription_element(int row)
+{
+    TranscriptionElement* newElement = new TranscriptionElement;
+    newElement->startTime = QStringLiteral("00:00:00");
+    newElement->endTime = QStringLiteral("00:00:00");
+    newElement->text = QStringLiteral("");
+
+    transcriptionData.insert(transcriptionData.cbegin() + row, newElement);
+}
+
+void TranscriptionManager::remove_transcription_element(int row)
+{
+    if (row >= 0 && row < transcriptionData.size())
+    {
+        transcriptionData.erase(transcriptionData.cbegin() + row);
+    }
+}
+
 void TranscriptionManager::populate_table()
 {
     tableWidget->clearContents();
-    tableWidget->setRowCount(transcriptionElements.size());
-    Element *elem = nullptr;
-    for (int i = 0; i < transcriptionElements.size(); ++i)
+    tableWidget->setRowCount(transcriptionData.size());
+    TranscriptionElement *elem = nullptr;
+    for (qsizetype i = 0; i < transcriptionData.size(); ++i)
     {
-        elem = transcriptionElements[i];
+        elem = transcriptionData[i];
         tableWidget->setItem(i, 0, new QTableWidgetItem(elem->startTime));
         tableWidget->setItem(i, 1, new QTableWidgetItem(elem->endTime));
         tableWidget->setItem(i, 2, new QTableWidgetItem(elem->text));

@@ -6,7 +6,7 @@
 #include <QtGlobal>
 #include <QRegularExpression>
 
-struct Element {
+struct TranscriptionElement {
     QString startTime;
     QString endTime;
     QString text;
@@ -17,7 +17,7 @@ namespace utils {
     qint64 convert_time_to_ms(const QString &timeString);
     qint64 extract_start_time(const QString &text);
     qint64 extract_end_time(const QString &text);
-    Element* extract_transcription_data(const QString &line);
+    TranscriptionElement* extract_transcription_data(const QString &line);
 
 }
 
