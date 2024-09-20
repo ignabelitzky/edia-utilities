@@ -59,7 +59,7 @@ qint64 utils::extract_end_time(const QString &text)
 TranscriptionElement* utils::extract_transcription_data(const QString &line)
 {
     // Define the regex pattern
-    QRegularExpression re(R"(\[(\d{2}:\d{2}:\d{2})\s*-\s(\d{2}:\d{2}:\d{2})\]\s*(.*))");
+    static QRegularExpression re(R"(\[(\d{2}:\d{2}:\d{2})\s*-\s(\d{2}:\d{2}:\d{2})\]\s*(.*))");
     QRegularExpressionMatch match = re.match(line);
 
     // Initialize an empty Element struct

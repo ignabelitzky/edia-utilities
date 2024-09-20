@@ -6,13 +6,13 @@
 
 namespace params {
     constexpr qint64 SEEK_AMOUNT = 5000;
-    const QString APP_NAME = QStringLiteral("TranscriptFixer");
-    const QString APP_VERSION = QStringLiteral("v0.0.1-alpha");
-    const std::vector<std::pair<QString, float>> speeds = { std::make_pair(QString("0.5x"), 0.5f),
-                                                            std::make_pair(QString("1.0x"), 1.0f),
-                                                            std::make_pair(QString("1.5x"), 1.5f),
-                                                            std::make_pair(QString("2.0x"), 2.0f) };
-    const int DEFAULT_VOLUME = 50;
+    inline const QString APP_NAME = QStringLiteral("TranscriptFixer");
+    inline const QString APP_VERSION = QStringLiteral("v0.0.1-alpha");
+    inline const std::vector<std::pair<QString, float>> speeds = { std::make_pair(QStringLiteral("0.5x"), 0.5f),
+                                                            std::make_pair(QStringLiteral("1.0x"), 1.0f),
+                                                            std::make_pair(QStringLiteral("1.5x"), 1.5f),
+                                                            std::make_pair(QStringLiteral("2.0x"), 2.0f) };
+    constexpr int DEFAULT_VOLUME = 50;
 }
 
 #endif // PARAMS_H
