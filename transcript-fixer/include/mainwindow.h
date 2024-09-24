@@ -56,6 +56,7 @@ private slots:
     void forward_button_clicked();
     void add_row();
     void delete_row();
+    void adjust_transcription_lines();
 
     // Actions slots
     void open_media_file();

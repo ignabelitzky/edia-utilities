@@ -129,8 +129,56 @@ void TranscriptionManager::remove_transcription_element(int row)
 {
     if (row >= 0 && row < transcriptionData.size())
     {
+        TranscriptionElement *elem = transcriptionData[row];
+        delete elem;
         transcriptionData.erase(transcriptionData.cbegin() + row);
     }
+}
+
+void TranscriptionManager::split_transcription_element(int row, int maxLength)
+{
+    if (row >= 0 && row < transcriptionData.size())
+    {
+        TranscriptionElement* element = transcriptionData[row];
+        QStringList splitText = utils::split_text_into_lines(element->text, maxLength);
+
+        if (splitText.size() <= 1)
+        {
+            return; // No need to split if there's nothing to split
+        }
+
+        QString originalStart = element->startTime;
+        QString originalEnd = element->endTime;
+
+        std::vector<std::pair<QString, QString>>* times = utils::adjust_timestamp(originalStart, originalEnd, splitText.size());
+
+        // Clear the original element
+        delete element; // Clean up the original element
+        transcriptionData.erase(transcriptionData.begin() + row); // Remove the original element
+
+        for (int i = 0; i < splitText.size(); ++i)
+        {
+            TranscriptionElement* newElement = new TranscriptionElement;
+            newElement->text = splitText[i];
+            newElement->startTime = times->at(i).first;
+            newElement->endTime = times->at(i).second;
+
+            // Insert the new element at the same index
+            transcriptionData.insert(transcriptionData.begin() + row + i, newElement);
+        }
+        delete times; // Clean up the times vector
+    }
+}
+
+
+void TranscriptionManager::update_table()
+{
+    this->populate_table();
+}
+
+qsizetype TranscriptionManager::element_count()
+{
+    return transcriptionData.count();
 }
 
 void TranscriptionManager::populate_table()

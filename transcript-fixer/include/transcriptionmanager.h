@@ -19,12 +19,15 @@ public:
     void change_transcription_element(int row, int column);
     void insert_transcription_element(int position);
     void remove_transcription_element(int position);
+    void split_transcription_element(int row, int maxLength);
+    void update_table();
+    qsizetype element_count();
 
 private:
     QTableWidget *tableWidget;
     QVector<TranscriptionElement *> transcriptionData;
 
-    void populate_table();   
+    void populate_table();
 };
 
 #endif // TRANSCRIPTIONMANAGER_H

@@ -75,3 +75,49 @@ TranscriptionElement* utils::extract_transcription_data(const QString &line)
     }
     return elem;
 }
+
+QStringList utils::split_text_into_lines(const QString& text, int maxLength)
+{
+    QStringList words = text.split(' ');
+    QStringList lines;
+    QString currentLine;
+
+    for (const QString& word : words)
+    {
+        if (currentLine.length() + word.length() + 1 <= maxLength)
+        {
+            if (!currentLine.isEmpty())
+            {
+                currentLine += ' ';
+            }
+            currentLine += word;
+        }
+        else
+        {
+            lines.push_back(currentLine);
+            currentLine = word;
+        }
+    }
+    if (!currentLine.isEmpty())
+    {
+        lines.push_back(currentLine);
+    }
+    return lines;
+}
+
+std::vector<std::pair<QString, QString>>* utils::adjust_timestamp(const QString& startTime, const QString& endTime, int totalLines)
+{
+    qint64 startMs = utils::convert_time_to_ms(startTime);
+    qint64 endMs = utils::convert_time_to_ms(endTime);
+    qint64 totalDuration = endMs - startMs;
+    qint64 segmentDuration = totalDuration / totalLines;
+
+    std::vector<std::pair<QString, QString>>* times = new std::vector<std::pair<QString, QString>>();
+
+    for (int i = 0; i < totalLines; ++i)
+    {
+        times->push_back(std::make_pair(utils::format_time(startMs), utils::format_time(startMs + segmentDuration)));
+        startMs += segmentDuration;
+    }
+    return times;
+}

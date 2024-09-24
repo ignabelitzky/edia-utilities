@@ -75,6 +75,7 @@ void MainWindow::connect_signals()
     connect(ui->addButton, &QPushButton::clicked, this, &MainWindow::add_row);
     connect(ui->deleteButton, &QPushButton::clicked, this, &MainWindow::delete_row);
     connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::save_transcription);
+    connect(ui->adjustLongLinesButton, &QPushButton::clicked, this, &MainWindow::adjust_transcription_lines);
     connect(ui->tableWidget, &QTableWidget::cellChanged, this, [this](int row, int column) {
         transcriptionManager->change_transcription_element(row, column);
     });
@@ -314,6 +315,17 @@ void MainWindow::delete_row()
         ui->tableWidget->removeRow(currentRow);
         transcriptionManager->remove_transcription_element(currentRow);
     }
+}
+
+void MainWindow::adjust_transcription_lines()
+{
+    long long int i = 0;
+    while (i < transcriptionManager->element_count())
+    {
+        transcriptionManager->split_transcription_element(i, params::MAX_CHAR_PER_LINE);
+        ++i;
+    }
+    transcriptionManager->update_table();
 }
 
 void MainWindow::open_media_file()

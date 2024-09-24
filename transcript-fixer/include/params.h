@@ -13,6 +13,8 @@ namespace params {
                                                             std::make_pair(QStringLiteral("1.5x"), 1.5f),
                                                             std::make_pair(QStringLiteral("2.0x"), 2.0f) };
     constexpr int DEFAULT_VOLUME = 50;
+    constexpr int MAX_CHAR_PER_LINE = 80;
+
 }
 
 #endif // PARAMS_H
