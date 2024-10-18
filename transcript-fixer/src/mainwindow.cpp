@@ -88,12 +88,13 @@ void MainWindow::set_default_icons()
     ui->backwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekBackward));
     ui->forwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
 
-    ui->playButton->setToolTip("Play/Pause");
-    ui->backwardButton->setToolTip("Backward");
-    ui->forwardButton->setToolTip("Forward");
-    ui->volumeButton->setToolTip("Mute/Unmute");
-    ui->addButton->setToolTip("Add row");
-    ui->deleteButton->setToolTip("Delete row");
+    ui->playButton->setToolTip("Play/Pause (Space)");
+    ui->backwardButton->setToolTip("Backward (Left arrow)");
+    ui->forwardButton->setToolTip("Forward (Right Arrow)");
+    ui->volumeButton->setToolTip("Mute/Unmute (Ctrl + M)");
+    ui->addButton->setToolTip("Add row (Ctrl + +)");
+    ui->deleteButton->setToolTip("Delete row (Ctrl + -)");
+    ui->saveButton->setToolTip("Save As (Ctrl + S)");
 }
 
 void MainWindow::cleanup_actions()
