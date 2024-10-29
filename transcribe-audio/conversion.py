@@ -1,5 +1,6 @@
 import os
 import subprocess
+import shutil
 
 
 def convert_mp3_to_wav(mp3_file):
@@ -11,9 +12,11 @@ def convert_mp3_to_wav(mp3_file):
     Returns:
         str: The output WAV file path if successful, None otherwise.
     """
-    try:
-        wav_file = os.path.splitext(mp3_file)[0] + ".wav"
-        command = [
+    if not shutil.which('ffmpeg'):
+        print("ffmpeg not found. Please install it and try again.")
+        return None
+    wav_file = os.path.splitext(mp3_file)[0] + ".wav"
+    command = [
             'ffmpeg',
             '-i', mp3_file,
             '-ac', '1',                 # Set the number of audio channels to 1 (mono)
@@ -21,12 +24,10 @@ def convert_mp3_to_wav(mp3_file):
             '-acodec', 'pcm_s16le',     # Set the audio codec to 16-bit PCM
             wav_file
         ]
-        subprocess.run(command, check=True)
+    try:
+        subprocess.run(command, check=True, stderr=subprocess.PIPE)
         print(f"MP3 successfully converted to WAV: {wav_file}")
         return wav_file
     except subprocess.CalledProcessError as e:
-        print(f"Error converting MP3 to WAV: {e}")
-        return None
-    except FileNotFoundError:
-        print("ffmpeg not found. Please install it and try again.")
+        print(f"Error converting MP3 to WAV: {e.stderr.decode()}")
         return None
