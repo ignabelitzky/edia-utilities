@@ -6,7 +6,6 @@
 #include <QMainWindow>
 #include <QTableWidgetItem>
 #include <QCloseEvent>
-#include <QThread>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -24,7 +23,6 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    QThread *mediaThread;
     MediaControl *mediaControl;
     QVector<QAction*> fileActions;
     QVector<QAction*> editActions;

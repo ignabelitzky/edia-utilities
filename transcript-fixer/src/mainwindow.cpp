@@ -6,26 +6,21 @@
 #include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), ui(new Ui::MainWindow), mediaThread(new QThread(this)),
+    QMainWindow(parent), ui(new Ui::MainWindow),
     mediaControl(new MediaControl)
 
 {
     ui->setupUi(this);
     transcriptionManager = new TranscriptionManager(this, ui->tableWidget);
-    mediaControl->moveToThread(mediaThread);
-    mediaThread->start();
     initialize_ui();
     connect_signals();
 }
 
 MainWindow::~MainWindow()
 {
-    mediaThread->quit();
-    mediaThread->wait();
     delete ui;
     delete mediaControl;
     delete transcriptionManager;
-    delete mediaThread;
     this->cleanup_actions();
 }
 
