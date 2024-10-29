@@ -1,9 +1,10 @@
 import tkinter as tk
 
-
-def choose_model():
+def choose_model_base_on_language(chosen_language):
     """Prompt the user to choose a Whisper model using a dropdown menu."""
-    models = ["tiny", "base", "small", "medium", "large"]
+    models = ["tiny", "base", "small", "medium"]
+    if chosen_language == "es":
+        models.append("large")
     
     model_window = tk.Tk()
     model_window.title("Choose Whisper Model")
