@@ -2,9 +2,11 @@
 #define UTILS_H
 
 #include <QString>
+#include <QStringList>
 #include <QTime>
 #include <QtGlobal>
 #include <QRegularExpression>
+#include <QInputDialog>
 
 struct TranscriptionElement {
     QString startTime;
@@ -20,6 +22,7 @@ namespace utils {
     TranscriptionElement* extract_transcription_data(const QString &line);
     QStringList split_text_into_lines(const QString& text, int maxLength);
     std::vector<std::pair<QString, QString>>* adjust_timestamp(const QString& startTime, const QString& endTime, int totalLines);
+    QString select_file_type();
 }
 
 #endif // UTILS_H

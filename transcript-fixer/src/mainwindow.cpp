@@ -4,6 +4,7 @@
 #include "include/params.h"
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QInputDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow),
@@ -370,23 +371,27 @@ void MainWindow::load_transcription_file()
 
 void MainWindow::save_transcription()
 {
+    QString fileType = utils::select_file_type();
+
     QString filter = QStringLiteral("Text files (*.txt);;Subtitle files (*.srt)");
     QString filePath = QFileDialog::getSaveFileName(this,
-                                                    "Save Transcription File",
+                                                    "Save File",
                                                     QDir::homePath(), filter);
-    if (!filePath.endsWith(".txt") && !filePath.endsWith(".srt"))
-    {
-        // Default to .txt if no extension is selected
-        filePath.append(".txt");
-    }
 
-    if (filePath.endsWith(".txt"))
+    if (fileType != "")
     {
-        transcriptionManager->save_transcription_as_txt(filePath);
-    }
-    else if (filePath.endsWith(".srt"))
-    {
-        transcriptionManager->save_transcription_as_srt(filePath);
+        if(fileType == params::FILE_TYPES.at(0))    // Transcription type
+        {
+            transcriptionManager->save_transcription_as_txt(filePath);
+        }
+        else if(fileType == params::FILE_TYPES.at(1))   // Subtitle type
+        {
+            transcriptionManager->save_transcription_as_srt(filePath);
+        }
+        else
+        {
+            QMessageBox::warning(this, "Error", "Could not save the file.");
+        }
     }
     else
     {

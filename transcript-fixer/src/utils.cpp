@@ -1,4 +1,5 @@
 #include "include/utils.h"
+#include "include/params.h"
 
 QString utils::format_time(const qint64 ms)
 {
@@ -120,4 +121,15 @@ std::vector<std::pair<QString, QString>>* utils::adjust_timestamp(const QString&
         startMs += segmentDuration;
     }
     return times;
+}
+
+QString utils::select_file_type()
+{
+    bool ok;
+    QString fileType = QInputDialog::getItem(nullptr, "Select File Type", "Choose the file format to save:", params::FILE_TYPES, 0, false, &ok);
+    if (!ok && fileType.isEmpty())
+    {
+        fileType = "";
+    }
+    return fileType;
 }
