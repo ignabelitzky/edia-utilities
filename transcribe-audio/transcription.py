@@ -1,5 +1,6 @@
 import whisper
 
+model_cache = {}
 
 def format_timestamp(seconds):
     """Format the timestamp in HH:MM:SS format."""
@@ -12,7 +13,9 @@ def format_timestamp(seconds):
 def transcribe_audio(wav_file, save_path, model_name, language):
     """Transcribe the audio using Whisper and save it with formatted timestamps."""
     try:
-        model = whisper.load_model(model_name)
+        if model_name not in model_cache:
+            model_cache[model_name] = whisper.load_model(model_name)
+        model = model_cache[model_name]
     except Exception as e:
         raise RuntimeError(f"Failed to load Whisper model: {e}")
     
