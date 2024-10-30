@@ -47,12 +47,13 @@ void MainWindow::initialize_ui()
     // Set default icons
     set_default_icons();
 
+    this->set_menu_actions();
+
     this->update_media_label("");
     this->update_transcription_label("");
 
+    this->disable_transcription_interface();
     this->disable_media_interface();
-
-    this->set_menu_actions();
 }
 
 void MainWindow::connect_signals()
@@ -119,6 +120,9 @@ void MainWindow::enable_media_interface()
     ui->backwardButton->setEnabled(true);
     ui->forwardButton->setEnabled(true);
     ui->playButton->setEnabled(true);
+    ui->volumeButton->setEnabled(true);
+    ui->volumeSlider->setEnabled(true);
+    ui->speedComboBox->setEnabled(true);
 }
 
 void MainWindow::disable_media_interface()
@@ -126,6 +130,37 @@ void MainWindow::disable_media_interface()
     ui->backwardButton->setEnabled(false);
     ui->forwardButton->setEnabled(false);
     ui->playButton->setEnabled(false);
+    ui->volumeButton->setEnabled(false);
+    ui->volumeSlider->setEnabled(false);
+    ui->speedComboBox->setEnabled(false);
+}
+
+void MainWindow::enable_transcription_interface()
+{
+    ui->addButton->setEnabled(true);
+    ui->deleteButton->setEnabled(true);
+    ui->adjustLongLinesButton->setEnabled(true);
+    ui->saveButton->setEnabled(true);
+    ui->tableWidget->setEnabled(true);
+    QAction* saveAction = this->find_action_by_text(fileActions, "&Save Transcription");
+    if (saveAction != nullptr)
+    {
+        saveAction->setEnabled(false);
+    }
+}
+
+void MainWindow::disable_transcription_interface()
+{
+    ui->addButton->setEnabled(false);
+    ui->deleteButton->setEnabled(false);
+    ui->adjustLongLinesButton->setEnabled(false);
+    ui->saveButton->setEnabled(false);
+    ui->tableWidget->setEnabled(false);
+    QAction* saveAction = this->find_action_by_text(fileActions, "&Save Transcription");
+    if (saveAction != nullptr)
+    {
+        saveAction->setEnabled(false);
+    }
 }
 
 void MainWindow::update_media_label(const QString &fileName)
@@ -197,6 +232,19 @@ void MainWindow::set_menu_connections()
     connect(helpActions.at(0), &QAction::triggered, this, &MainWindow::show_shortcuts);
     connect(helpActions.at(1), &QAction::triggered, this, &MainWindow::show_instructions);
     connect(helpActions.at(2), &QAction::triggered, this, &MainWindow::show_about);
+}
+
+QAction* MainWindow::find_action_by_text(const QVector<QAction*>& actions, const QString text)
+{
+    QAction* result = nullptr;
+    for (int i = 0; i < actions.size(); ++i)
+    {
+        if (actions.at(i)->text() == text)
+        {
+            result = actions.at(i);
+        }
+    }
+    return result;
 }
 
 void MainWindow::volume_button_clicked()
@@ -367,6 +415,7 @@ void MainWindow::load_transcription_file()
     {
         update_transcription_label("");
     }
+    this->enable_transcription_interface();
 }
 
 void MainWindow::save_transcription()

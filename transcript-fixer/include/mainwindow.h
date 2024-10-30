@@ -36,10 +36,13 @@ private:
 
     void enable_media_interface();
     void disable_media_interface();
+    void enable_transcription_interface();
+    void disable_transcription_interface();
     void update_media_label(const QString &fileName);
     void update_transcription_label(const QString &fileName);
     void set_menu_actions();
     void set_menu_connections();
+    QAction* find_action_by_text(const QVector<QAction*>& actions, const QString text);
 
 private slots:
     void volume_button_clicked();
