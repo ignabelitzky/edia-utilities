@@ -49,11 +49,11 @@ void MainWindow::initialize_ui()
 
     this->set_menu_actions();
 
-    this->update_media_label("");
-    this->update_transcription_label("");
+    this->update_label(ui->mediaFilenameLabel, "", params::MEDIA_FILE_UNOPEN_MESSAGE);
+    this->update_label(ui->transcriptionFilenameLabel, "", params::TRANSCRIPTION_FILE_UNOPEN_MESSAGE);
 
-    this->disable_transcription_interface();
-    this->disable_media_interface();
+    this->set_transcription_interface_enabled(false);
+    this->set_media_interface_enabled(false);
 }
 
 void MainWindow::connect_signals()
@@ -115,79 +115,41 @@ void MainWindow::cleanup_actions()
     helpActions.clear();
 }
 
-void MainWindow::enable_media_interface()
+void MainWindow::set_media_interface_enabled(bool enabled)
 {
-    ui->backwardButton->setEnabled(true);
-    ui->forwardButton->setEnabled(true);
-    ui->playButton->setEnabled(true);
-    ui->volumeButton->setEnabled(true);
-    ui->volumeSlider->setEnabled(true);
-    ui->speedComboBox->setEnabled(true);
+    ui->backwardButton->setEnabled(enabled);
+    ui->forwardButton->setEnabled(enabled);
+    ui->playButton->setEnabled(enabled);
+    ui->volumeButton->setEnabled(enabled);
+    ui->volumeSlider->setEnabled(enabled);
+    ui->speedComboBox->setEnabled(enabled);
 }
 
-void MainWindow::disable_media_interface()
+void MainWindow::set_transcription_interface_enabled(bool enabled)
 {
-    ui->backwardButton->setEnabled(false);
-    ui->forwardButton->setEnabled(false);
-    ui->playButton->setEnabled(false);
-    ui->volumeButton->setEnabled(false);
-    ui->volumeSlider->setEnabled(false);
-    ui->speedComboBox->setEnabled(false);
-}
-
-void MainWindow::enable_transcription_interface()
-{
-    ui->addButton->setEnabled(true);
-    ui->deleteButton->setEnabled(true);
-    ui->adjustLongLinesButton->setEnabled(true);
-    ui->saveButton->setEnabled(true);
-    ui->tableWidget->setEnabled(true);
+    ui->addButton->setEnabled(enabled);
+    ui->deleteButton->setEnabled(enabled);
+    ui->adjustLongLinesButton->setEnabled(enabled);
+    ui->saveButton->setEnabled(enabled);
+    ui->tableWidget->setEnabled(enabled);
     QAction* saveAction = this->find_action_by_text(fileActions, "&Save Transcription");
     if (saveAction != nullptr)
     {
-        saveAction->setEnabled(false);
+        saveAction->setEnabled(enabled);
     }
 }
 
-void MainWindow::disable_transcription_interface()
-{
-    ui->addButton->setEnabled(false);
-    ui->deleteButton->setEnabled(false);
-    ui->adjustLongLinesButton->setEnabled(false);
-    ui->saveButton->setEnabled(false);
-    ui->tableWidget->setEnabled(false);
-    QAction* saveAction = this->find_action_by_text(fileActions, "&Save Transcription");
-    if (saveAction != nullptr)
-    {
-        saveAction->setEnabled(false);
-    }
-}
-
-void MainWindow::update_media_label(const QString &fileName)
+void MainWindow::update_label(QLabel* label, const QString& fileName, const QString& defaultText)
 {
     if (fileName.isEmpty())
     {
-        ui->mediaFilenameLabel->setText("Media file not opened.");
-        ui->mediaFilenameLabel->setStyleSheet("color: red;");
+        label->setText(defaultText);
+        label->setStyleSheet("color: red;");
     }
     else
     {
-        ui->mediaFilenameLabel->setText(fileName);
-        ui->mediaFilenameLabel->setStyleSheet("");
-    }
-}
-
-void MainWindow::update_transcription_label(const QString &fileName)
-{
-    if (fileName.isEmpty())
-    {
-        ui->transcriptionFilenameLabel->setText("Transcription file not opened.");
-        ui->transcriptionFilenameLabel->setStyleSheet("color: red;");
-    }
-    else
-    {
-        ui->transcriptionFilenameLabel->setText(fileName);
-        ui->transcriptionFilenameLabel->setStyleSheet("");
+        label->setText(fileName);
+        label->setStyleSheet("");
     }
 }
 
@@ -325,37 +287,50 @@ void MainWindow::forward_button_clicked()
 
 void MainWindow::add_row()
 {
-    // Block signals to prevent cell Changed from being triggered
-    ui->tableWidget->blockSignals(true);
-    int currentRow = ui->tableWidget->currentRow();
+    const QString defaultTimestamp = "00:00:00";
+    const QString defaultText = "";
 
+    // Block signals ssafely with QSignalBlocker
+    QSignalBlocker blocker(ui->tableWidget);
+
+    if (!ui->tableWidget)
+        return;
+
+    int currentRow = ui->tableWidget->currentRow();
     if (currentRow == -1)
     {
         currentRow = ui->tableWidget->rowCount();
     }
 
+    // Insert a new row at the specified position
     ui->tableWidget->insertRow(currentRow);
 
-    ui->tableWidget->setItem(currentRow, 0, new QTableWidgetItem("00:00:00"));
-    ui->tableWidget->setItem(currentRow, 1, new QTableWidgetItem("00:00:00"));
-    ui->tableWidget->setItem(currentRow, 2, new QTableWidgetItem(""));
+    // Create items with default values and set alignment
+    QTableWidgetItem *startItem = new QTableWidgetItem(defaultTimestamp);
+    QTableWidgetItem *endItem = new QTableWidgetItem(defaultTimestamp);
+    QTableWidgetItem *textItem = new QTableWidgetItem(defaultText);
+    ui->tableWidget->setItem(currentRow, 0, startItem);
+    ui->tableWidget->setItem(currentRow, 1, endItem);
+    ui->tableWidget->setItem(currentRow, 2, textItem);
 
-    // Re-enable signals
-    ui->tableWidget->blockSignals(false);
-
+    // Update the transcription manager
     transcriptionManager->insert_transcription_element(currentRow);
 }
 
 void MainWindow::delete_row()
 {
-    int currentRow = ui->tableWidget->currentRow();
+    if (!ui->tableWidget || ui->tableWidget->rowCount() == 0)
+        return;
 
+    // Block signals to prevent unwanted changes
+    QSignalBlocker blocker(ui->tableWidget);
+
+    int currentRow = ui->tableWidget->currentRow();
     if (currentRow == -1)
     {
         currentRow = ui->tableWidget->rowCount() - 1;
     }
-
-    if (ui->tableWidget->rowCount() > 0 && currentRow >= 0 && currentRow < ui->tableWidget->rowCount())
+    if (currentRow >= 0)
     {
         ui->tableWidget->removeRow(currentRow);
         transcriptionManager->remove_transcription_element(currentRow);
@@ -387,14 +362,14 @@ void MainWindow::open_media_file()
 
         // Extract the base name of the file
         QFileInfo fileInfo(filePath);
-        update_media_label(fileInfo.fileName());
+        this->update_label(ui->mediaFilenameLabel, fileInfo.fileName(), "");
 
         // Enable media interface
-        enable_media_interface();
+        this->set_media_interface_enabled(true);
     }
     else
     {
-        update_media_label("");
+        this->update_label(ui->mediaFilenameLabel, "", params::MEDIA_FILE_UNOPEN_MESSAGE);
     }
 }
 
@@ -409,13 +384,13 @@ void MainWindow::load_transcription_file()
     {
         transcriptionManager->load_transcription(filePath);
         QFileInfo fileInfo(filePath);
-        update_transcription_label(fileInfo.fileName());
+        this->update_label(ui->transcriptionFilenameLabel, fileInfo.fileName(), "");
     }
     else
     {
-        update_transcription_label("");
+        this->update_label(ui->transcriptionFilenameLabel, "", params::TRANSCRIPTION_FILE_UNOPEN_MESSAGE);
     }
-    this->enable_transcription_interface();
+    this->set_transcription_interface_enabled(true);
 }
 
 void MainWindow::save_transcription()
@@ -466,7 +441,7 @@ void MainWindow::show_shortcuts()
     shortcutsText += "<b>Jump to Time:</b> Double-click on transcription<br>";
     shortcutsText += "<b>Add row:</b> Ctrl++<br>";
     shortcutsText += "<b>Delete row:</b> Ctrl+-<br>";
-    shortcutsText += "<b>Quit:</b> Ctrl+E";
+    shortcutsText += "<b>Quit:</b> Ctrl+Q";
 
     QMessageBox::information(this, "Shortcuts", shortcutsText);
 }

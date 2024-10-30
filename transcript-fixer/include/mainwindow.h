@@ -6,6 +6,7 @@
 #include <QMainWindow>
 #include <QTableWidgetItem>
 #include <QCloseEvent>
+#include <QLabel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -34,12 +35,9 @@ private:
     void set_default_icons();
     void cleanup_actions();
 
-    void enable_media_interface();
-    void disable_media_interface();
-    void enable_transcription_interface();
-    void disable_transcription_interface();
-    void update_media_label(const QString &fileName);
-    void update_transcription_label(const QString &fileName);
+    void set_media_interface_enabled(bool enabled);
+    void set_transcription_interface_enabled(bool enabled);
+    void update_label(QLabel* label, const QString& text, const QString& defaultText);
     void set_menu_actions();
     void set_menu_connections();
     QAction* find_action_by_text(const QVector<QAction*>& actions, const QString text);

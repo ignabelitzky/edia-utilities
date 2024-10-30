@@ -16,6 +16,9 @@ namespace params {
     inline const QStringList FILE_TYPES = {QStringLiteral("Transcription"), QStringLiteral("Subtitle")};
     constexpr int DEFAULT_VOLUME = 50;
     constexpr int MAX_CHAR_PER_LINE = 80;
+
+    inline const QString MEDIA_FILE_UNOPEN_MESSAGE = QStringLiteral("Media file not opened.");
+    inline const QString TRANSCRIPTION_FILE_UNOPEN_MESSAGE = QStringLiteral("Transcription file not opened.");
 }
 
 #endif // PARAMS_H
