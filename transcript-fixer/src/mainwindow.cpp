@@ -375,7 +375,6 @@ void MainWindow::open_media_file()
     }
     else
     {
-        update_label(ui->mediaFilenameLabel, "", params::MEDIA_FILE_UNOPEN_MESSAGE);
         ui->statusbar->showMessage("Warning: No media file selected", 5000);
     }
 }

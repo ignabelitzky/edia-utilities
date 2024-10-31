@@ -2,6 +2,12 @@
 #include "include/params.h"
 #include <QFile>
 
+static bool check_line_format(const QString &line)
+{
+    static QRegularExpression regex("^\\[\\d{2}:\\d{2}:\\d{2} - \\d{2}:\\d{2}:\\d{2}\\]");
+    return regex.match(line).hasMatch();
+}
+
 QString utils::format_time(const qint64 ms)
 {
     int hours = (ms / (1000 * 60 * 60)) % 24;
@@ -133,12 +139,6 @@ QString utils::select_file_type()
         fileType = "";
     }
     return fileType;
-}
-
-static bool check_line_format(const QString &line)
-{
-    static QRegularExpression regex("^\\[\\d{2}:\\d{2}:\\d{2} - \\d{2}:\\d{2}:\\d{2}\\]");
-    return regex.match(line).hasMatch();
 }
 
 bool utils::check_transcription_format(const QString& filePath)
