@@ -379,18 +379,24 @@ void MainWindow::load_transcription_file()
                                                     "Open Transcription File",
                                                     QDir::homePath(),
                                                     "Text Files (*.txt);;All Files (*.*)");
-    // Check if a file was selected
     if (!filePath.isEmpty())
     {
-        transcriptionManager->load_transcription(filePath);
-        QFileInfo fileInfo(filePath);
-        this->update_label(ui->transcriptionFilenameLabel, fileInfo.fileName(), "");
+        if (utils::check_transcription_format(filePath))
+        {
+            transcriptionManager->load_transcription(filePath);
+            QFileInfo fileInfo(filePath);
+            this->update_label(ui->transcriptionFilenameLabel, fileInfo.fileName(), "");
+            this->set_transcription_interface_enabled(true);
+        }
+        else
+        {
+            QMessageBox::warning(this, "Error", "Incorrect transcription file format.");
+        }
     }
     else
     {
-        this->update_label(ui->transcriptionFilenameLabel, "", params::TRANSCRIPTION_FILE_UNOPEN_MESSAGE);
+        QMessageBox::warning(this, "Error", "No file selected.");
     }
-    this->set_transcription_interface_enabled(true);
 }
 
 void MainWindow::save_transcription()

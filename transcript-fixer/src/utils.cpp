@@ -1,5 +1,6 @@
 #include "include/utils.h"
 #include "include/params.h"
+#include <QFile>
 
 QString utils::format_time(const qint64 ms)
 {
@@ -132,4 +133,28 @@ QString utils::select_file_type()
         fileType = "";
     }
     return fileType;
+}
+
+static bool check_line_format(const QString &line)
+{
+    static QRegularExpression regex("^\\[\\d{2}:\\d{2}:\\d{2} - \\d{2}:\\d{2}:\\d{2}\\]");
+    return regex.match(line).hasMatch();
+}
+
+bool utils::check_transcription_format(const QString& filePath)
+{
+    bool isValidFormat = true;
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        isValidFormat = false;
+    }
+    QTextStream in(&file);
+    while (!in.atEnd() && isValidFormat)
+    {
+        QString line = in.readLine();
+        isValidFormat = check_line_format(line);
+    }
+    file.close();
+    return isValidFormat;
 }

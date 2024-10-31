@@ -23,6 +23,7 @@ namespace utils {
     QStringList split_text_into_lines(const QString& text, int maxLength);
     std::vector<std::pair<QString, QString>>* adjust_timestamp(const QString& startTime, const QString& endTime, int totalLines);
     QString select_file_type();
+    bool check_transcription_format(const QString& filePath);
 }
 
 #endif // UTILS_H
