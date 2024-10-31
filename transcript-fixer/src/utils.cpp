@@ -128,7 +128,7 @@ QString utils::select_file_type()
 {
     bool ok;
     QString fileType = QInputDialog::getItem(nullptr, "Select File Type", "Choose the file format to save:", params::FILE_TYPES, 0, false, &ok);
-    if (!ok && fileType.isEmpty())
+    if (!ok)
     {
         fileType = "";
     }

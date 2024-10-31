@@ -22,13 +22,13 @@ MainWindow::~MainWindow()
     delete ui;
     delete mediaControl;
     delete transcriptionManager;
-    this->cleanup_actions();
+    cleanup_actions();
 }
 
 void MainWindow::initialize_ui()
 {
-    this->showMaximized();
-    this->setWindowTitle(params::APP_NAME);
+    showMaximized();
+    setWindowTitle(params::APP_NAME);
 
     ui->volumeSlider->setRange(0, 100);
     ui->volumeSlider->setValue(params::DEFAULT_VOLUME);
@@ -44,16 +44,18 @@ void MainWindow::initialize_ui()
     }
     ui->speedComboBox->setCurrentIndex(1);
 
+    ui->statusbar->showMessage("Welcome to TranscriptFixer! Use Ctrl+O to open a media file, or Ctrl+L to open a transcription file", 10000);
+
     // Set default icons
     set_default_icons();
 
-    this->set_menu_actions();
+    set_menu_actions();
 
-    this->update_label(ui->mediaFilenameLabel, "", params::MEDIA_FILE_UNOPEN_MESSAGE);
-    this->update_label(ui->transcriptionFilenameLabel, "", params::TRANSCRIPTION_FILE_UNOPEN_MESSAGE);
+    update_label(ui->mediaFilenameLabel, "", params::MEDIA_FILE_UNOPEN_MESSAGE);
+    update_label(ui->transcriptionFilenameLabel, "", params::TRANSCRIPTION_FILE_UNOPEN_MESSAGE);
 
-    this->set_transcription_interface_enabled(false);
-    this->set_media_interface_enabled(false);
+    set_transcription_interface_enabled(false);
+    set_media_interface_enabled(false);
 }
 
 void MainWindow::connect_signals()
@@ -132,7 +134,7 @@ void MainWindow::set_transcription_interface_enabled(bool enabled)
     ui->adjustLongLinesButton->setEnabled(enabled);
     ui->saveButton->setEnabled(enabled);
     ui->tableWidget->setEnabled(enabled);
-    QAction* saveAction = this->find_action_by_text(fileActions, "&Save Transcription");
+    QAction* saveAction = find_action_by_text(fileActions, "&Save Transcription");
     if (saveAction != nullptr)
     {
         saveAction->setEnabled(enabled);
@@ -179,7 +181,7 @@ void MainWindow::set_menu_actions()
     }
 
     // Make the connections
-    this->set_menu_connections();
+    set_menu_connections();
 }
 
 void MainWindow::set_menu_connections()
@@ -315,6 +317,7 @@ void MainWindow::add_row()
 
     // Update the transcription manager
     transcriptionManager->insert_transcription_element(currentRow);
+    ui->statusbar->showMessage("Row created", 2000);
 }
 
 void MainWindow::delete_row()
@@ -334,6 +337,7 @@ void MainWindow::delete_row()
     {
         ui->tableWidget->removeRow(currentRow);
         transcriptionManager->remove_transcription_element(currentRow);
+        ui->statusbar->showMessage("Row deleted", 2000);
     }
 }
 
@@ -346,6 +350,7 @@ void MainWindow::adjust_transcription_lines()
         ++i;
     }
     transcriptionManager->update_table();
+    ui->statusbar->showMessage("Transcription lines adjusted", 2000);
 }
 
 void MainWindow::open_media_file()
@@ -359,17 +364,19 @@ void MainWindow::open_media_file()
     if (!filePath.isEmpty())
     {
         mediaControl->set_source(QUrl::fromLocalFile(filePath));
+        ui->statusbar->showMessage("Media file loaded", 5000);
 
         // Extract the base name of the file
         QFileInfo fileInfo(filePath);
-        this->update_label(ui->mediaFilenameLabel, fileInfo.fileName(), "");
+        update_label(ui->mediaFilenameLabel, fileInfo.fileName(), "");
 
         // Enable media interface
-        this->set_media_interface_enabled(true);
+        set_media_interface_enabled(true);
     }
     else
     {
-        this->update_label(ui->mediaFilenameLabel, "", params::MEDIA_FILE_UNOPEN_MESSAGE);
+        update_label(ui->mediaFilenameLabel, "", params::MEDIA_FILE_UNOPEN_MESSAGE);
+        ui->statusbar->showMessage("Warning: No media file selected", 5000);
     }
 }
 
@@ -385,17 +392,18 @@ void MainWindow::load_transcription_file()
         {
             transcriptionManager->load_transcription(filePath);
             QFileInfo fileInfo(filePath);
-            this->update_label(ui->transcriptionFilenameLabel, fileInfo.fileName(), "");
-            this->set_transcription_interface_enabled(true);
+            update_label(ui->transcriptionFilenameLabel, fileInfo.fileName(), "");
+            set_transcription_interface_enabled(true);
+            ui->statusbar->showMessage("Transcription file loaded", 5000);
         }
         else
         {
-            QMessageBox::warning(this, "Error", "Incorrect transcription file format.");
+            ui->statusbar->showMessage("Warning: Unsupported file format", 5000);
         }
     }
     else
     {
-        QMessageBox::warning(this, "Error", "No file selected.");
+        ui->statusbar->showMessage("Warning: No transcription file selected", 5000);
     }
 }
 
@@ -403,29 +411,37 @@ void MainWindow::save_transcription()
 {
     QString fileType = utils::select_file_type();
 
-    QString filter = QStringLiteral("Text files (*.txt);;Subtitle files (*.srt)");
-    QString filePath = QFileDialog::getSaveFileName(this,
-                                                    "Save File",
-                                                    QDir::homePath(), filter);
-
-    if (fileType != "")
+    if (!fileType.isEmpty())
     {
-        if(fileType == params::FILE_TYPES.at(0))    // Transcription type
+        QString filter = QStringLiteral("All (*.*);;Text files (*.txt);;Subtitle files (*.srt)");
+        QString filePath = QFileDialog::getSaveFileName(this,
+                                                        "Save File",
+                                                        QDir::homePath(), filter);
+        if (filePath.isEmpty())
         {
-            transcriptionManager->save_transcription_as_txt(filePath);
-        }
-        else if(fileType == params::FILE_TYPES.at(1))   // Subtitle type
-        {
-            transcriptionManager->save_transcription_as_srt(filePath);
+            ui->statusbar->showMessage("Warning: Save operation was cancelled", 5000);
         }
         else
         {
-            QMessageBox::warning(this, "Error", "Could not save the file.");
+            if(fileType == params::FILE_TYPES.at(0))    // Transcription type
+            {
+                transcriptionManager->save_transcription_as_txt(filePath);
+                ui->statusbar->showMessage("File saved as text transcription", 5000);
+            }
+            else if(fileType == params::FILE_TYPES.at(1))   // Subtitle type
+            {
+                transcriptionManager->save_transcription_as_srt(filePath);
+                ui->statusbar->showMessage("File saved as subtitle", 5000);
+            }
+            else
+            {
+                ui->statusbar->showMessage("Error: Invalid file type selected", 5000);
+            }
         }
     }
     else
     {
-        QMessageBox::warning(this, "Error", "Could not save the file.");
+        ui->statusbar->showMessage("Warning: File type selection was cancelled", 5000);
     }
 }
 
