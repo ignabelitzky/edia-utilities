@@ -3,6 +3,7 @@
 
 #include "include/mediacontrol.h"
 #include "include/transcriptionmanager.h"
+#include "include/waveform.h"
 #include <QMainWindow>
 #include <QTableWidgetItem>
 #include <QCloseEvent>
@@ -29,6 +30,7 @@ private:
     QVector<QAction*> editActions;
     QVector<QAction*> helpActions;
     TranscriptionManager *transcriptionManager;
+    Waveform *waveform;
 
     void initialize_ui();
     void connect_signals();

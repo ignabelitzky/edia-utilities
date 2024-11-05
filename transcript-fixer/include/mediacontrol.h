@@ -18,8 +18,8 @@ public:
     void pause();
     bool is_playing();
     void set_position(qint64 position);
-    qint64 get_position();
-    qint64 get_duration();
+    qint64 get_position() const;
+    qint64 get_duration() const;
     void set_playback_rate(qreal rate);
     void set_volume(int volume);
     void mute(bool muted);

@@ -1,6 +1,6 @@
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia opengl
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia opengl printsupport
 
 CONFIG += c++17
 
@@ -15,14 +15,18 @@ SOURCES += \
     src/mainwindow.cpp \
     src/mediacontrol.cpp \
     src/transcriptionmanager.cpp \
-    src/utils.cpp
+    src/utils.cpp \
+    src/qcustomplot.cpp \
+    src/waveform.cpp
 
 HEADERS += \
     include/mainwindow.h \
     include/mediacontrol.h \
     include/params.h \
     include/transcriptionmanager.h \
-    include/utils.h
+    include/utils.h \
+    include/qcustomplot.h \
+    include/waveform.h
 
 FORMS += \
     ui/mainwindow.ui

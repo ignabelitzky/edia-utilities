@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     transcriptionManager = new TranscriptionManager(this, ui->tableWidget);
+    waveform = new Waveform(this->mediaControl, this);
     initialize_ui();
     connect_signals();
 }
@@ -22,6 +23,7 @@ MainWindow::~MainWindow()
     delete ui;
     delete mediaControl;
     delete transcriptionManager;
+    delete waveform;
     cleanup_actions();
 }
 
@@ -56,6 +58,8 @@ void MainWindow::initialize_ui()
 
     set_transcription_interface_enabled(false);
     set_media_interface_enabled(false);
+
+    ui->verticalLayout_4->addWidget(waveform);
 }
 
 void MainWindow::connect_signals()
@@ -66,6 +70,7 @@ void MainWindow::connect_signals()
     connect(ui->volumeSlider, &QSlider::valueChanged, this, &MainWindow::update_media_volume);
     connect(mediaControl->get_media_player(), &QMediaPlayer::positionChanged, this, &MainWindow::update_audio_slider_position);
     connect(mediaControl->get_media_player(), &QMediaPlayer::durationChanged, this, &MainWindow::update_audio_slider_duration);
+    // connect(mediaControl->get_media_player(), &QMediaPlayer::positionChanged, waveform, &Waveform::updateWaveform);
     connect(ui->audioSlider, &QSlider::sliderMoved, mediaControl->get_media_player(),&QMediaPlayer::setPosition);
     connect(mediaControl->get_media_player(), &QMediaPlayer::mediaStatusChanged, this, &MainWindow::handle_media_status_changed);
     connect(ui->backwardButton, &QPushButton::clicked, this, &MainWindow::backward_button_clicked);
@@ -363,6 +368,7 @@ void MainWindow::open_media_file()
     // Check if a file was selected
     if (!filePath.isEmpty())
     {
+        waveform->setSource(filePath);
         mediaControl->set_source(QUrl::fromLocalFile(filePath));
         ui->statusbar->showMessage("Media file loaded", 5000);
 

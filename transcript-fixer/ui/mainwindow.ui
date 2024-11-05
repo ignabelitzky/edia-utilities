@@ -260,6 +260,9 @@ Long Lines</string>
      </layout>
     </item>
     <item>
+     <layout class="QVBoxLayout" name="verticalLayout_4"/>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <property name="topMargin">
        <number>0</number>
@@ -408,7 +411,7 @@ Long Lines</string>
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_7">
+       <spacer name="horizontalSpacer_5">
         <property name="orientation">
          <enum>Qt::Orientation::Horizontal</enum>
         </property>

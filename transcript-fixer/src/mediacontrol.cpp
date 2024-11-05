@@ -40,12 +40,12 @@ void MediaControl::set_position(qint64 position)
     mediaPlayer->setPosition(position);
 }
 
-qint64 MediaControl::get_position()
+qint64 MediaControl::get_position() const
 {
     return mediaPlayer->position();
 }
 
-qint64 MediaControl::get_duration()
+qint64 MediaControl::get_duration() const
 {
     return mediaPlayer->duration();
 }
