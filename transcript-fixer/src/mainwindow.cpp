@@ -366,7 +366,7 @@ void MainWindow::open_media_file()
     // Check if a file was selected
     if (!filePath.isEmpty())
     {
-        waveform->setSource(filePath);
+        waveform->set_source(filePath);
         mediaControl->set_source(QUrl::fromLocalFile(filePath));
         ui->statusbar->showMessage("Media file loaded", 5000);
 

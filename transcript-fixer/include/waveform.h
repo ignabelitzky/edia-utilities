@@ -12,15 +12,16 @@ class Waveform : public QCustomPlot
 public:
     explicit Waveform(MediaControl* mediaControl, QWidget *parent = nullptr);
     ~Waveform();
-    void setSource(const QString& fileName);
+    void set_source(const QString& fileName);
 
 public slots:
-    void setBuffer();
-    // void plot();
-    void updateWaveform(qint64 currentTimeMs);
+    void set_buffer();
+    void update_waveform(qint64 currentTimeMs);
 
 private:
-    qreal getPeakValue(const QAudioFormat& format);
+    qreal get_peak_value(const QAudioFormat& format);
+    void initialize_timer();
+    void configure_waveform_appearance();
     QAudioDecoder *decoder;
     QAudioBuffer buffer;
     QVector<double> samples;
