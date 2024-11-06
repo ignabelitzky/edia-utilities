@@ -144,20 +144,6 @@ void MainWindow::set_transcription_interface_enabled(bool enabled)
     }
 }
 
-void MainWindow::update_label(QLabel* label, const QString& fileName, const QString& defaultText)
-{
-    if (fileName.isEmpty())
-    {
-        label->setText(defaultText);
-        label->setStyleSheet("color: red;");
-    }
-    else
-    {
-        label->setText(fileName);
-        label->setStyleSheet("");
-    }
-}
-
 void MainWindow::set_menu_actions()
 {
     // File Actions
@@ -201,6 +187,20 @@ void MainWindow::set_menu_connections()
     connect(helpActions.at(2), &QAction::triggered, this, &MainWindow::show_about);
 }
 
+void MainWindow::update_label(QLabel* label, const QString& fileName, const QString& defaultText)
+{
+    if (fileName.isEmpty())
+    {
+        label->setText(defaultText);
+        label->setStyleSheet("color: red;");
+    }
+    else
+    {
+        label->setText(fileName);
+        label->setStyleSheet("");
+    }
+}
+
 QAction* MainWindow::find_action_by_text(const QVector<QAction*>& actions, const QString text)
 {
     QAction* result = nullptr;
@@ -223,15 +223,15 @@ void MainWindow::volume_button_clicked()
 
 void MainWindow::play_button_clicked()
 {
-    if (!mediaControl->is_playing())
-    {
-        mediaControl->play();
-        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
-    }
-    else
+    if (mediaControl->get_state() == MediaControl::PlaybackState::Playing)
     {
         mediaControl->pause();
         ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    }
+    else
+    {
+        mediaControl->play();
+        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
     }
 }
 
@@ -264,6 +264,7 @@ void MainWindow::handle_media_status_changed(QMediaPlayer::MediaStatus status)
     {
         ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
         mediaControl->set_position(0);
+        mediaControl->pause();
     }
 }
 
@@ -368,6 +369,7 @@ void MainWindow::open_media_file()
     {
         waveform->set_source(filePath);
         mediaControl->set_source(QUrl::fromLocalFile(filePath));
+        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
         ui->statusbar->showMessage("Media file loaded", 5000);
 
         // Extract the base name of the file

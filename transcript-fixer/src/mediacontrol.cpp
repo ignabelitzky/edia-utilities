@@ -2,9 +2,10 @@
 #include "include/params.h"
 
 MediaControl::MediaControl(QObject *parent) : QObject(parent)
+    , mediaPlayer(new QMediaPlayer(this))
+    , audioOutput(new QAudioOutput(this))
+    , playbackState(PlaybackState::Stopped)
 {
-    mediaPlayer = new QMediaPlayer(this);
-    audioOutput = new QAudioOutput(this);
     mediaPlayer->setAudioOutput(audioOutput);
     this->set_volume(params::DEFAULT_VOLUME);
 }
@@ -18,26 +19,42 @@ MediaControl::~MediaControl()
 void MediaControl::set_source(QUrl source)
 {
     mediaPlayer->setSource(source);
+    playbackState = PlaybackState::Stopped;
 }
 
 void MediaControl::play()
 {
-    mediaPlayer->play();
+    if (playbackState != PlaybackState::Playing)
+    {
+        mediaPlayer->play();
+        playbackState = PlaybackState::Playing;
+    }
 }
 
 void MediaControl::pause()
 {
-    mediaPlayer->pause();
+    if (playbackState == PlaybackState::Playing)
+    {
+        mediaPlayer->pause();
+        playbackState = PlaybackState::Paused;
+    }
 }
 
-bool MediaControl::is_playing()
+void MediaControl::toggle_play_pause()
 {
-    return mediaPlayer->isPlaying();
+    if (playbackState == PlaybackState::Playing)
+    {
+        pause();
+    }
+    else
+    {
+        play();
+    }
 }
 
-void MediaControl::set_position(qint64 position)
+MediaControl::PlaybackState MediaControl::get_state() const
 {
-    mediaPlayer->setPosition(position);
+    return playbackState;
 }
 
 qint64 MediaControl::get_position() const
@@ -48,6 +65,11 @@ qint64 MediaControl::get_position() const
 qint64 MediaControl::get_duration() const
 {
     return mediaPlayer->duration();
+}
+
+void MediaControl::set_position(qint64 position)
+{
+    mediaPlayer->setPosition(position);
 }
 
 void MediaControl::set_playback_rate(qreal rate)
@@ -65,7 +87,7 @@ void MediaControl::mute(bool muted)
     audioOutput->setMuted(muted);
 }
 
-bool MediaControl::is_muted()
+bool MediaControl::is_muted() const
 {
     return audioOutput->isMuted();
 }

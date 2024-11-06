@@ -39,9 +39,9 @@ private:
 
     void set_media_interface_enabled(bool enabled);
     void set_transcription_interface_enabled(bool enabled);
-    void update_label(QLabel* label, const QString& text, const QString& defaultText);
     void set_menu_actions();
     void set_menu_connections();
+    void update_label(QLabel* label, const QString& text, const QString& defaultText);
     QAction* find_action_by_text(const QVector<QAction*>& actions, const QString text);
 
 private slots:
