@@ -10,7 +10,17 @@ Waveform::Waveform(MediaControl* mediaControl, QWidget *parent) : QCustomPlot(pa
     marker->start->setCoords(0, -1);
     marker->end->setCoords(0, 1);
     wavePlot = addGraph();
+
+    // Waveform visual configuration
     setMinimumHeight(50);
+    setMinimumWidth(1000);
+    xAxis->setVisible(false);
+    yAxis->setVisible(false);
+    xAxis->grid()->setVisible(false);
+    yAxis->grid()->setVisible(false);
+    axisRect()->setMargins(QMargins(0, 0, 0, 0));
+    setBackground(QBrush(Qt::transparent));
+
 
     // Initialize the QTimer
     updateTimer = new QTimer(this);
@@ -19,17 +29,14 @@ Waveform::Waveform(MediaControl* mediaControl, QWidget *parent) : QCustomPlot(pa
         updateWaveform(this->mediaControl->get_position());
     });
 
-    // Set the timer interval to X milliseconds
-    updateTimer->start(500);
+    // Set the timer interval to 200 milliseconds
+    updateTimer->start(200);
 
     connect(decoder, &QAudioDecoder::bufferReady, this, &Waveform::setBuffer);
-    //connect(decoder, &QAudioDecoder::finished, this, &Waveform::updateWaveform);
 }
 
 Waveform::~Waveform()
 {
-    delete decoder;
-    delete marker;
 }
 
 void Waveform::setSource(const QString& fileName)
@@ -42,6 +49,7 @@ void Waveform::setSource(const QString& fileName)
 
 void Waveform::setBuffer()
 {
+    // Check if the decoder is in a state where reading is possible
     buffer = decoder->read();
 
     // Set sampleRate only once
@@ -60,21 +68,6 @@ void Waveform::setBuffer()
         samples.append(val);
     }
 }
-/*
-void Waveform::plot()
-{
-    int sampleCount = samples.size();
-    QVector<double> xValues(sampleCount);
-    for (int i = 0; i < sampleCount; ++i)
-    {
-        xValues[i] = i;
-    }
-    wavePlot->addData(xValues, samples);
-    xAxis->setRange(0, sampleCount);
-    yAxis->setRange(QCPRange(-1, 1));
-    replot();
-}
-*/
 
 qreal Waveform::getPeakValue(const QAudioFormat& format)
 {
@@ -113,17 +106,17 @@ void Waveform::updateWaveform(qint64 currentTimeMs)
     }
     else
     {
-        // Convert 30 seconds to samples
-        int samplesFor30Sec = sampleRate * 30;
+        // Convert 10 seconds to samples
+        int timeWindow = sampleRate * 10;
 
         // Find the center sample index corresponding to currentTimeMs
         int centerSampleIndex = (currentTimeMs / 1000.0) * sampleRate;
 
-        // Calculate start and end indices for a 30-second window around the center
-        int startSampleIndex = qMax(0, centerSampleIndex - samplesFor30Sec / 2);
-        int endSampleIndex = qMin(samples.size(), centerSampleIndex + samplesFor30Sec / 2);
+        // Calculate start and end indices for a 10-second window around the center
+        int startSampleIndex = qMax(0, centerSampleIndex - timeWindow / 2);
+        int endSampleIndex = qMin(samples.size(), centerSampleIndex + timeWindow / 2);
 
-        // Extract the 30-second segment
+        // Extract the 10-second segment
         QVector<double> xValues;
         QVector<double> segmentSamples;
         for (int i = startSampleIndex; i < endSampleIndex; ++i)
@@ -137,9 +130,11 @@ void Waveform::updateWaveform(qint64 currentTimeMs)
         wavePlot->addData(xValues, segmentSamples);
         xAxis->setRange(xValues.first(), xValues.last());
         yAxis->setRange(QCPRange(-1, 1));
-        int markerXPosition = (xValues.first() + xValues.last()) / 2;
-        marker->start->setCoords(markerXPosition, -1);
-        marker->end->setCoords(markerXPosition, 1);
+
+        // Set the marker to the actual current playback sample index
+        marker->start->setCoords(centerSampleIndex, -1);
+        marker->end->setCoords(centerSampleIndex, 1);
+
         replot();
     }
 }
