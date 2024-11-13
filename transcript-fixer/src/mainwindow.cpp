@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     transcriptionManager = new TranscriptionManager(this, ui->tableWidget);
     waveform = new Waveform(this->mediaControl, this);
     initialize_ui();
+    initialize_toolbar();
     connect_signals();
 }
 
@@ -59,6 +60,17 @@ void MainWindow::initialize_ui()
 
     set_transcription_interface_enabled(false);
     set_media_interface_enabled(false);
+}
+
+void MainWindow::initialize_toolbar()
+{
+    ui->toolbar->addAction(fileActions.at(0));
+    ui->toolbar->addAction(fileActions.at(1));
+    ui->toolbar->addAction(fileActions.at(2));
+    ui->toolbar->addSeparator();
+    ui->toolbar->addAction(editActions.at(0));
+    ui->toolbar->addAction(editActions.at(1));
+    ui->toolbar->setIconSize(QSize(16, 16));
 }
 
 void MainWindow::connect_signals()
@@ -142,28 +154,40 @@ void MainWindow::set_transcription_interface_enabled(bool enabled)
     {
         saveAction->setEnabled(enabled);
     }
+    for (QAction* action : editActions)
+    {
+        action->setEnabled(enabled);
+    }
 }
 
 void MainWindow::set_menu_actions()
 {
     // File Actions
-    fileActions.push_back(new QAction(tr("&Open Media File"), this));
+    fileActions.push_back(new QAction(style()->standardIcon(QStyle::SP_DirOpenIcon), tr("&Open Media File"), this));
     fileActions.last()->setShortcut(QKeySequence::Open);
-    fileActions.push_back(new QAction(tr("&Load Transcription File"), this));
+    fileActions.push_back(new QAction(style()->standardIcon(QStyle::SP_FileDialogContentsView), tr("&Load Transcription File"), this));
     fileActions.last()->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_L));
-    fileActions.push_back(new QAction(tr("&Save Transcription"), this));
+    fileActions.push_back(new QAction(style()->standardIcon(QStyle::SP_DialogSaveButton), tr("&Save Transcription"), this));
     fileActions.last()->setShortcut(QKeySequence::Save);
-    fileActions.push_back(new QAction(tr("&Quit Application"), this));
+    fileActions.push_back(new QAction(style()->standardIcon(QStyle::SP_DialogCloseButton), tr("&Quit Application"), this));
     fileActions.last()->setShortcut((QKeySequence::Quit));
     for (QAction* action : fileActions)
     {
         ui->menuFile->addAction(action);
     }
 
+    // Edit Actions
+    editActions.push_back(new QAction(style()->standardIcon(QStyle::SP_DialogOkButton), tr("Add row"), this));
+    editActions.push_back(new QAction(style()->standardIcon(QStyle::SP_TrashIcon), tr("Delete row"), this));
+    for (QAction* action : editActions)
+    {
+        ui->menuEdit->addAction(action);
+    }
+
     // Help Actions
     helpActions.push_back(new QAction(tr("Shortcuts"), this));
     helpActions.push_back(new QAction(tr("Usage Instructions"), this));
-    helpActions.push_back(new QAction(tr("About %1").arg(params::APP_NAME), this));
+    helpActions.push_back(new QAction(style()->standardIcon(QStyle::SP_MessageBoxInformation), tr("About %1").arg(params::APP_NAME), this));
     for (QAction* action : helpActions)
     {
         ui->menuHelp->addAction(action);
@@ -180,6 +204,10 @@ void MainWindow::set_menu_connections()
     connect(fileActions.at(1), &QAction::triggered, this, &MainWindow::load_transcription_file);
     connect(fileActions.at(2), &QAction::triggered, this, &MainWindow::save_transcription);
     connect(fileActions.at(3), &QAction::triggered, this, &MainWindow::quit_application);
+
+    // Edit connections
+    connect(editActions.at(0), &QAction::triggered, this, &MainWindow::add_row);
+    connect(editActions.at(1), &QAction::triggered, this, &MainWindow::delete_row);
 
     // Help connections
     connect(helpActions.at(0), &QAction::triggered, this, &MainWindow::show_shortcuts);

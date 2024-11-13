@@ -33,6 +33,7 @@ private:
     Waveform *waveform;
 
     void initialize_ui();
+    void initialize_toolbar();
     void connect_signals();
     void set_default_icons();
     void cleanup_actions();
