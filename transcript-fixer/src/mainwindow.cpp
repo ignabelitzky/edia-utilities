@@ -321,7 +321,7 @@ void MainWindow::forward_button_clicked()
 
 void MainWindow::add_row()
 {
-    const QString defaultTimestamp = "00:00:00";
+    const QString defaultTimestamp = "00:00:00,000";
     const QString defaultText = "";
 
     // Block signals ssafely with QSignalBlocker
