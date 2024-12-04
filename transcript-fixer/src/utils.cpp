@@ -4,7 +4,7 @@
 
 static bool check_line_format(const QString &line)
 {
-    static QRegularExpression regex("^\\[\\d{2}:\\d{2}:\\d{2} - \\d{2}:\\d{2}:\\d{2}\\]");
+    static QRegularExpression regex("^\\[\\d{2}:\\d{2}:\\d{2},\\d{3} - \\d{2}:\\d{2}:\\d{2}\\,\\d{3}]");
     return regex.match(line).hasMatch();
 }
 
@@ -18,7 +18,7 @@ QString utils::format_time(const qint64 ms)
 
 qint64 utils::convert_time_to_ms(const QString &timeString)
 {
-    QTime time = QTime::fromString(timeString, "hh:mm:ss");
+    QTime time = QTime::fromString(timeString, "hh:mm:ss,zzz");
     if (!time.isValid())
     {
         return 0;
@@ -28,7 +28,7 @@ qint64 utils::convert_time_to_ms(const QString &timeString)
 
 qint64 utils::extract_start_time(const QString &text)
 {
-    static const QRegularExpression re("\\[(\\d{2}):(\\d{2}):(\\d{2}) - \\d{2}:\\d{2}:\\d{2}\\]");
+    static const QRegularExpression re("\\[(\\d{2}):(\\d{2}):(\\d{2}),(\\d{3}) - (\\d{2}):(\\d{2}):(\\d{2}),(\\d{3})\\]");
     QRegularExpressionMatch match = re.match(text);
 
     if (match.hasMatch())
@@ -37,9 +37,10 @@ qint64 utils::extract_start_time(const QString &text)
         int hours = match.captured(1).toInt();
         int minutes = match.captured(2).toInt();
         int seconds = match.captured(3).toInt();
+        int milliseconds = match.captured(4).toInt();
 
         // Convert to milliseconds
-        QTime time(hours, minutes, seconds);
+        QTime time(hours, minutes, seconds, milliseconds);
         return time.msecsSinceStartOfDay();
     }
     return 0;
@@ -47,18 +48,19 @@ qint64 utils::extract_start_time(const QString &text)
 
 qint64 utils::extract_end_time(const QString &text)
 {
-    static const QRegularExpression re("\\[(\\d{2}):(\\d{2}):(\\d{2}) - \\d{2}:\\d{2}:\\d{2}\\]");
+    static const QRegularExpression re("\\[(\\d{2}):(\\d{2}):(\\d{2}),(\\d{3}) - (\\d{2}):(\\d{2}):(\\d{2}),(\\d{3})\\]");
     QRegularExpressionMatch match = re.match(text);
 
     if (match.hasMatch())
     {
         // Extract hours, minutes, and seconds
-        int hours = match.captured(4).toInt();
-        int minutes = match.captured(5).toInt();
-        int seconds = match.captured(6).toInt();
+        int hours = match.captured(5).toInt();
+        int minutes = match.captured(6).toInt();
+        int seconds = match.captured(7).toInt();
+        int milliseconds = match.captured(8).toInt();
 
         // Convert to milliseconds
-        QTime time(hours, minutes, seconds);
+        QTime time(hours, minutes, seconds, milliseconds);
         return time.msecsSinceStartOfDay();
     }
     return 0;
@@ -67,7 +69,7 @@ qint64 utils::extract_end_time(const QString &text)
 TranscriptionElement* utils::extract_transcription_data(const QString &line)
 {
     // Define the regex pattern
-    static QRegularExpression re(R"(\[(\d{2}:\d{2}:\d{2})\s*-\s(\d{2}:\d{2}:\d{2})\]\s*(.*))");
+    static QRegularExpression re(R"(\[(\d{2}:\d{2}:\d{2},\d{3})\s*-\s(\d{2}:\d{2}:\d{2},\d{3})\]\s*(.*))");
     QRegularExpressionMatch match = re.match(line);
 
     // Initialize an empty Element struct

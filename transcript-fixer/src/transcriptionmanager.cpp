@@ -62,7 +62,6 @@ void TranscriptionManager::save_transcription_as_txt(const QString &filePath)
     {
         out << "[" << element->startTime << " - " << element->endTime << "] " << element->text << "\n";
     }
-
     file.close();
 }
 
@@ -76,7 +75,7 @@ void TranscriptionManager::save_transcription_as_srt(const QString &filePath)
     }
 
     QTextStream out(&file);
-    qsizetype counter = 0;
+    qsizetype counter = 1;
     for (const TranscriptionElement* element : transcriptionData)
     {
         out << counter << "\n";
@@ -118,8 +117,8 @@ void TranscriptionManager::change_transcription_element(int row, int column)
 void TranscriptionManager::insert_transcription_element(int row)
 {
     TranscriptionElement* newElement = new TranscriptionElement;
-    newElement->startTime = QStringLiteral("00:00:00");
-    newElement->endTime = QStringLiteral("00:00:00");
+    newElement->startTime = QStringLiteral("00:00:00,000");
+    newElement->endTime = QStringLiteral("00:00:00,000");
     newElement->text = QStringLiteral("");
 
     transcriptionData.insert(transcriptionData.cbegin() + row, newElement);

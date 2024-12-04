@@ -3,11 +3,13 @@ import whisper
 model_cache = {}
 
 def format_timestamp(seconds):
-    """Format the timestamp in HH:MM:SS format."""
-    hours = int(seconds // 3600)
-    minutes = int((seconds % 3600) // 60)
-    seconds = int(seconds % 60)
-    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    """Format the timestamp in HH:MM:SS:MMM format."""
+    milliseconds = int((seconds - int(seconds)) * 1000)
+    seconds = int(seconds)
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d},{milliseconds:03d}"
 
 
 def transcribe_audio(wav_file, save_path, model_name, language):
