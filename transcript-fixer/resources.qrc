@@ -1,0 +1,25 @@
+<RCC>
+    <qresource prefix="/icons/multimedia">
+        <file alias="backward">resources/icons/backward-30.png</file>
+        <file alias="forward">resources/icons/forward-30.png</file>
+        <file alias="mute">resources/icons/mute-50.png</file>
+        <file alias="pause">resources/icons/pause-30.png</file>
+        <file alias="play">resources/icons/play-30.png</file>
+        <file alias="volume">resources/icons/volume-50.png</file>
+    </qresource>
+    <qresource prefix="/icons/file_operations">
+        <file alias="save-as">resources/icons/save-as-48.png</file>
+        <file alias="open-media">resources/icons/open-media-48.png</file>
+        <file alias="open-transcription">resources/icons/open-transcription-48.png</file>
+        <file alias="close">resources/icons/close-48.png</file>
+    </qresource>
+    <qresource prefix="/icons/row_management">
+        <file alias="remove">resources/icons/remove-48.png</file>
+        <file alias="add">resources/icons/add-48.png</file>
+        <file alias="adjust">resources/icons/adjust-48.png</file>
+    </qresource>
+    <qresource prefix="/icons/information">
+        <file alias="about">resources/icons/about-48.png</file>
+    </qresource>
+    <qresource prefix="/new/prefix1"/>
+</RCC>

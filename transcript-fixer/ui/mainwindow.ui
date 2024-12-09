@@ -189,7 +189,8 @@ QScrollBar::handle:vertical {
            <string>Add row</string>
           </property>
           <property name="icon">
-           <iconset theme="QIcon::ThemeIcon::ListAdd"/>
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/row_management/add</normaloff>:/icons/row_management/add</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -208,7 +209,8 @@ QScrollBar::handle:vertical {
            <string>Delete row</string>
           </property>
           <property name="icon">
-           <iconset theme="QIcon::ThemeIcon::ListRemove"/>
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/row_management/remove</normaloff>:/icons/row_management/remove</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -228,7 +230,8 @@ QScrollBar::handle:vertical {
 Long Lines</string>
           </property>
           <property name="icon">
-           <iconset theme="QIcon::ThemeIcon::ViewRefresh"/>
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/row_management/adjust</normaloff>:/icons/row_management/adjust</iconset>
           </property>
          </widget>
         </item>
@@ -251,7 +254,8 @@ Long Lines</string>
            <string>Save As</string>
           </property>
           <property name="icon">
-           <iconset theme="QIcon::ThemeIcon::DocumentSaveAs"/>
+           <iconset resource="../resources.qrc">
+            <normaloff>:/icons/file_operations/save-as</normaloff>:/icons/file_operations/save-as</iconset>
           </property>
          </widget>
         </item>
@@ -330,7 +334,8 @@ Long Lines</string>
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::MediaSeekBackward"/>
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/multimedia/backward</normaloff>:/icons/multimedia/backward</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -352,7 +357,8 @@ Long Lines</string>
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::MediaPlaybackStart"/>
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/multimedia/play</normaloff>:/icons/multimedia/play</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -371,7 +377,8 @@ Long Lines</string>
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::MediaSeekForward"/>
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/multimedia/forward</normaloff>:/icons/multimedia/forward</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -403,7 +410,8 @@ Long Lines</string>
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::AudioVolumeMedium"/>
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/multimedia/volume</normaloff>:/icons/multimedia/volume</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -487,6 +495,8 @@ Long Lines</string>
    </attribute>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

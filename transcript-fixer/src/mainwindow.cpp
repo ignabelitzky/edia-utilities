@@ -50,7 +50,6 @@ void MainWindow::initialize_ui()
 
     ui->verticalLayout_4->addWidget(waveform);
 
-    // Set default icons
     set_default_icons();
 
     set_menu_actions();
@@ -97,10 +96,10 @@ void MainWindow::connect_signals()
 
 void MainWindow::set_default_icons()
 {
-    ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-    ui->volumeButton->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
-    ui->backwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekBackward));
-    ui->forwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
+    ui->playButton->setIcon(QIcon(":/icons/multimedia/play"));
+    ui->volumeButton->setIcon(QIcon(":/icons/multimedia/volume"));
+    ui->backwardButton->setIcon(QIcon(":/icons/multimedia/backward"));
+    ui->forwardButton->setIcon(QIcon(":/icons/multimedia/forward"));
 
     ui->playButton->setToolTip("Play/Pause (Space)");
     ui->backwardButton->setToolTip("Backward (Left arrow)");
@@ -163,13 +162,13 @@ void MainWindow::set_transcription_interface_enabled(bool enabled)
 void MainWindow::set_menu_actions()
 {
     // File Actions
-    fileActions.push_back(new QAction(style()->standardIcon(QStyle::SP_DirOpenIcon), tr("&Open Media File"), this));
+    fileActions.push_back(new QAction(QIcon(":/icons/file_operations/open-media"), tr("&Open Media File"), this));
     fileActions.last()->setShortcut(QKeySequence::Open);
-    fileActions.push_back(new QAction(style()->standardIcon(QStyle::SP_FileDialogContentsView), tr("&Load Transcription File"), this));
+    fileActions.push_back(new QAction(QIcon(":/icons/file_operations/open-transcription"), tr("&Load Transcription File"), this));
     fileActions.last()->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_L));
-    fileActions.push_back(new QAction(style()->standardIcon(QStyle::SP_DialogSaveButton), tr("&Save Transcription"), this));
+    fileActions.push_back(new QAction(QIcon(":/icons/file_operations/save-as"), tr("&Save As"), this));
     fileActions.last()->setShortcut(QKeySequence::Save);
-    fileActions.push_back(new QAction(style()->standardIcon(QStyle::SP_DialogCloseButton), tr("&Quit Application"), this));
+    fileActions.push_back(new QAction(QIcon(":/icons/file_operations/close"), tr("&Quit Application"), this));
     fileActions.last()->setShortcut((QKeySequence::Quit));
     for (QAction* action : fileActions)
     {
@@ -177,8 +176,8 @@ void MainWindow::set_menu_actions()
     }
 
     // Edit Actions
-    editActions.push_back(new QAction(style()->standardIcon(QStyle::SP_DialogOkButton), tr("Add row"), this));
-    editActions.push_back(new QAction(style()->standardIcon(QStyle::SP_TrashIcon), tr("Delete row"), this));
+    editActions.push_back(new QAction(QIcon(":/icons/row_management/add"), tr("Add row"), this));
+    editActions.push_back(new QAction(QIcon(":/icons/row_management/remove"), tr("Delete row"), this));
     for (QAction* action : editActions)
     {
         ui->menuEdit->addAction(action);
@@ -187,7 +186,7 @@ void MainWindow::set_menu_actions()
     // Help Actions
     helpActions.push_back(new QAction(tr("Shortcuts"), this));
     helpActions.push_back(new QAction(tr("Usage Instructions"), this));
-    helpActions.push_back(new QAction(style()->standardIcon(QStyle::SP_MessageBoxInformation), tr("About %1").arg(params::APP_NAME), this));
+    helpActions.push_back(new QAction(QIcon(":/icons/information/about"), tr("About %1").arg(params::APP_NAME), this));
     for (QAction* action : helpActions)
     {
         ui->menuHelp->addAction(action);
@@ -245,7 +244,7 @@ QAction* MainWindow::find_action_by_text(const QVector<QAction*>& actions, const
 void MainWindow::volume_button_clicked()
 {
     bool isMuted = mediaControl->is_muted();
-    ui->volumeButton->setIcon(style()->standardIcon(isMuted ? QStyle::SP_MediaVolume : QStyle::SP_MediaVolumeMuted));
+    ui->volumeButton->setIcon(QIcon(isMuted ? ":/icons/multimedia/volume" : ":/icons/multimedia/mute"));
     mediaControl->mute(!isMuted);
 }
 
@@ -254,12 +253,12 @@ void MainWindow::play_button_clicked()
     if (mediaControl->get_state() == MediaControl::PlaybackState::Playing)
     {
         mediaControl->pause();
-        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+        ui->playButton->setIcon(QIcon(":/icons/multimedia/play"));
     }
     else
     {
         mediaControl->play();
-        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+        ui->playButton->setIcon(QIcon(":/icons/multimedia/pause"));
     }
 }
 
@@ -290,7 +289,7 @@ void MainWindow::handle_media_status_changed(QMediaPlayer::MediaStatus status)
 {
     if (status == QMediaPlayer::EndOfMedia)
     {
-        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+        ui->playButton->setIcon(QIcon(":/icons/multimedia/play"));
         mediaControl->set_position(0);
         mediaControl->pause();
     }
@@ -397,7 +396,7 @@ void MainWindow::open_media_file()
     {
         waveform->set_source(filePath);
         mediaControl->set_source(QUrl::fromLocalFile(filePath));
-        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+        ui->playButton->setIcon(QIcon(":/icons/multimedia/play"));
         ui->statusbar->showMessage("Media file loaded", 5000);
 
         // Extract the base name of the file

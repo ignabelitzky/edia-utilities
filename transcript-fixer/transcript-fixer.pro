@@ -38,3 +38,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 # Enable parallel compilation (optional)
 QMAKE_PARALLEL_COMPILE = -j8
+
+RESOURCES += \
+    ./resources.qrc
