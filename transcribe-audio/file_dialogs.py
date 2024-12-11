@@ -3,12 +3,12 @@ from tkinter import filedialog
 import os
 
 
-def select_mp3_file():
+def select_audio_file():
     """Open a file dialog to select an MP3 file and return the file path."""
     file_path = filedialog.askopenfilename(
         title="Select an MP3 file",
         initialdir=os.path.expanduser("~/"),
-        filetypes=(("MP3 files", "*.mp3"), ("All files", "*.*"))
+        filetypes=(("MP3 files", "*.mp3"), ("WAV files", "*.wav"), ("All files", "*.*"))
     )
     return file_path
 
