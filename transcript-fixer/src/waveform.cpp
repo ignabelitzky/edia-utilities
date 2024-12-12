@@ -1,7 +1,7 @@
 #include "include/waveform.h"
 #include <QtGlobal>
 
-constexpr int UPDATE_INTERVAL_MS = 300;
+constexpr int UPDATE_INTERVAL_MS = 600;
 
 Waveform::Waveform(MediaControl* mediaControl, QWidget *parent) : QCustomPlot(parent)
     , decoder(new QAudioDecoder(this)), marker(new QCPItemLine(this))
