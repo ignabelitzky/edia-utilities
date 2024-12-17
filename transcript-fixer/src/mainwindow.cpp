@@ -414,28 +414,67 @@ void MainWindow::open_media_file()
 
 void MainWindow::load_transcription_file()
 {
-    QString filePath = QFileDialog::getOpenFileName(this,
-                                                    "Open Transcription File",
-                                                    QDir::homePath(),
-                                                    "Text Files (*.txt);;All Files (*.*)");
-    if (!filePath.isEmpty())
+    QString fileType = utils::select_file_type_to_open();
+
+    if (!fileType.isEmpty())
     {
-        if (utils::check_transcription_format(filePath))
+        if (fileType == params::FILE_TYPES.at(0))   // Transcription type
         {
-            transcriptionManager->load_transcription(filePath);
-            QFileInfo fileInfo(filePath);
-            update_label(ui->transcriptionFilenameLabel, fileInfo.fileName(), "");
-            set_transcription_interface_enabled(true);
-            ui->statusbar->showMessage("Transcription file loaded", 5000);
+            QString filePath = QFileDialog::getOpenFileName(this,
+                                                            "Open Transcription File",
+                                                            QDir::homePath(),
+                                                            "Text Files (*.txt);;All Files (*.*)");
+            if (!filePath.isEmpty())
+            {
+                if (utils::check_transcription_format(filePath))
+                {
+                    transcriptionManager->load_transcription(filePath);
+                    QFileInfo fileInfo(filePath);
+                    update_label(ui->transcriptionFilenameLabel, fileInfo.fileName(), "");
+                    set_transcription_interface_enabled(true);
+                    ui->statusbar->showMessage("Transcription file loaded", 5000);
+                }
+                else
+                {
+                    ui->statusbar->showMessage("Warning: Unsupported file format", 5000);
+                }
+            }
+            else
+            {
+                ui->statusbar->showMessage("Warning: No transcription file selected", 5000);
+            }
+        }
+        else if (fileType == params::FILE_TYPES.at(1))  // Subtitle type
+        {
+            QString filePath = QFileDialog::getOpenFileName(this,
+                                                            "Open Subtitle File",
+                                                            QDir::homePath(),
+                                                            "Subtitle files (*.srt);;All Files (*.*)");
+            if (!filePath.isEmpty())
+            {
+                if (utils::check_subtitle_format(filePath))
+                {
+                    transcriptionManager->load_subtitle(filePath);
+                    QFileInfo fileInfo(filePath);
+                    update_label(ui->transcriptionFilenameLabel, fileInfo.fileName(), "");
+                    set_transcription_interface_enabled(true);
+                    ui->tableWidget->resizeRowsToContents();
+                    ui->statusbar->showMessage("Subtitle file loaded", 5000);
+                }
+                else
+                {
+                    ui->statusbar->showMessage("Warning: Unsupported file format", 5000);
+                }
+            }
+            else
+            {
+                ui->statusbar->showMessage("Warning: No subtitle file selected", 5000);
+            }
         }
         else
         {
-            ui->statusbar->showMessage("Warning: Unsupported file format", 5000);
+            ui->statusbar->showMessage("Error: Invalid file type selected", 5000);
         }
-    }
-    else
-    {
-        ui->statusbar->showMessage("Warning: No transcription file selected", 5000);
     }
 }
 

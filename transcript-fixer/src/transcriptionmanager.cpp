@@ -24,7 +24,7 @@ void TranscriptionManager::load_transcription(const QString &filePath)
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QMessageBox::warning(nullptr, "Error", "Failed to open the file.");
-            return;
+        return;
     }
 
     QTextStream in(&file);
@@ -48,6 +48,39 @@ void TranscriptionManager::load_transcription(const QString &filePath)
     populate_table();
 }
 
+void TranscriptionManager::load_subtitle(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QMessageBox::warning(nullptr, "Error", "Failed to open the file.");
+        return;
+    }
+
+    QTextStream in(&file);
+    for (TranscriptionElement* elem : transcriptionData)
+    {
+        delete elem;
+    }
+    transcriptionData.clear();
+
+    while (!in.atEnd())
+    {
+        QString line = "";
+        QString block = "";
+        while ((line = in.readLine()) != "")
+        {
+            block += line + "\n";
+        }
+        if (!block.isEmpty())
+        {
+            transcriptionData.push_back(utils::extract_subtitle_data(block));
+        }
+    }
+    file.close();
+    populate_table();
+}
+
 void TranscriptionManager::save_transcription_as_txt(const QString &filePath)
 {
     QFile file(filePath);
@@ -60,7 +93,9 @@ void TranscriptionManager::save_transcription_as_txt(const QString &filePath)
     QTextStream out(&file);
     for (const TranscriptionElement* element : transcriptionData)
     {
-        out << "[" << element->startTime << " - " << element->endTime << "] " << element->text << "\n";
+        QString textWithSpaces = element->text;
+        textWithSpaces.replace("\n", " ");
+        out << "[" << element->startTime << " - " << element->endTime << "] " << textWithSpaces << "\n";
     }
     file.close();
 }

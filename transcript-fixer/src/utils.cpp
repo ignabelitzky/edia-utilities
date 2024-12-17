@@ -8,6 +8,12 @@ static bool check_line_format(const QString &line)
     return regex.match(line).hasMatch();
 }
 
+static bool check_subtitle_block_format(const QString &block)
+{
+    static QRegularExpression regex("^\\d+\\n\\d{2}:\\d{2}:\\d{2},\\d{3} --> \\d{2}:\\d{2}:\\d{2},\\d{3}\\n.+", QRegularExpression::DotMatchesEverythingOption);
+    return regex.match(block).hasMatch();
+}
+
 QString utils::format_time(const qint64 ms)
 {
     int hours = (ms / (1000 * 60 * 60)) % 24;
@@ -86,6 +92,26 @@ TranscriptionElement* utils::extract_transcription_data(const QString &line)
     return elem;
 }
 
+TranscriptionElement* utils::extract_subtitle_data(const QString &block)
+{
+    // Define the regex pattern
+    static QRegularExpression re(R"((\d+)\n(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\n(.+))", QRegularExpression::DotMatchesEverythingOption);
+    QRegularExpressionMatch match = re.match(block);
+
+    // Initialize an empty Element struct
+    TranscriptionElement* elem = new TranscriptionElement;
+
+    // Check if the block matches the pattern
+    if (match.hasMatch())
+    {
+        // Extract start time, end time, and text from the matched groups
+        elem->startTime = match.captured(2); // Second captured group is start time
+        elem->endTime = match.captured(3);   // Third captured group is end time
+        elem->text = match.captured(4);      // Fourth captured group is the transcription text
+    }
+    return elem;
+}
+
 QStringList utils::split_text_into_lines(const QString& text, int maxLength)
 {
     QStringList words = text.split(' ');
@@ -143,6 +169,17 @@ QString utils::select_file_type()
     return fileType;
 }
 
+QString utils::select_file_type_to_open()
+{
+    bool ok;
+    QString fileType = QInputDialog::getItem(nullptr, "Select File Type", "Choose the file format to open:", params::FILE_TYPES, 0, false, &ok);
+    if (!ok)
+    {
+        fileType = "";
+    }
+    return fileType;
+}
+
 bool utils::check_transcription_format(const QString& filePath)
 {
     bool isValidFormat = true;
@@ -156,6 +193,29 @@ bool utils::check_transcription_format(const QString& filePath)
     {
         QString line = in.readLine();
         isValidFormat = check_line_format(line);
+    }
+    file.close();
+    return isValidFormat;
+}
+
+bool utils::check_subtitle_format(const QString& filePath)
+{
+    bool isValidFormat = true;
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        isValidFormat = false;
+    }
+    QTextStream in(&file);
+    while (!in.atEnd() && isValidFormat)
+    {
+        QString line = "";
+        QString block = "";
+        while ((line = in.readLine()) != "")
+        {
+            block += line + "\n";
+        }
+        isValidFormat = check_subtitle_block_format(block);
     }
     file.close();
     return isValidFormat;

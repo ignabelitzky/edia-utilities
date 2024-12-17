@@ -14,6 +14,7 @@ public:
     explicit TranscriptionManager(QObject *parent, QTableWidget *tableWidget);
     ~TranscriptionManager();
     void load_transcription(const QString &filePath);
+    void load_subtitle(const QString &filePath);
     void save_transcription_as_txt(const QString &filePath);
     void save_transcription_as_srt(const QString &filePath);
     void change_transcription_element(int row, int column);
